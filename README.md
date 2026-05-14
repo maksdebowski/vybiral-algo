@@ -1,2 +1,3 @@
 # vybiral-algo
-algorytmy i implementacje do amgisterki
+
+algorytmy i implementacje do magisterki
