@@ -1,0 +1,10 @@
+Rozdział ten ma na celu zapoznanie czytelnika z aparatem matematycznym niezbędnym do konstrukcji i analizy algorytmów uczenia funkcji o niewielkiej liczbie parametrów liniowych. Zamiast jedynie wymieniać odizolowane definicje, prześledzimy, w jaki sposób poszczególne działy matematyki łączą się ze sobą, tworząc spójne fundamenty dla naszych algorytmów.
+
+\subsection{Geometria problemu i analiza macierzowa}
+Naszym głównym zadaniem jest skuteczna aproksymacja funkcji wielowymiarowej zdefiniowanej jako
+$$f(x)=g(Ax).$$
+Aby w ogóle móc mierzyć błędy tej aproksymacji oraz precyzyjnie operować na wektorach i macierzach, musimy oprzeć się na odpowiednich normach. Dla wektora $x \in \mathbb{R}^n$, jego normę $l_p$ dla $0<p<\infty$ definiujemy klasycznie jako $$\|x\|_{l_p^n} := (\sum_{i=1}^n |x_i|^p)^{1/p}.$$
+Z kolei do szacowania odległości pomiędzy macierzami posłużymy się normą Frobeniusa, która dla macierzy $X \in M_{n \times m}$ przyjmuje postać
+$$\|X\|_F := (\sum_{ij} |x_{ij}|^2)^{1/2}.$$
+
+Skoro funkcja $f$ jest w rzeczywistości kontrolowana przez macierz $A$, zbadanie właściwości takich macierzy staje się priorytetem. Gwarantuje nam to zredukowany rozkład według wartości osobliwych (SVD). Każdą macierz $X \in M_{n \times m}$ możemy zapisać w postaci $X = U \Sigma V^T$. Macierze $U \in M_{n \times p}$ oraz $V \in M_{m \times p}$ (gdzie $p \le \min(n,m)$) posiadają ortonormalne kolumny, natomiast $\Sigma = \text{diag}(\sigma_1, \dots, \sigma_p)$ jest macierzą diagonalną przechowującą uporządkowane rosnąco wartości osobliwe $\sigma_1 \ge \sigma_2 \ge \dots \ge \sigma_p \ge 0$. Rozkład SVD posłuży nam w algorytmach do izolowania kluczowych parametrów kierunkowych.

@@ -1,0 +1,26 @@
+\subsection{ Aproksymacja funkcji jednowymiarowej (Algorytm 1) – Szczegółowe omówienie przypadku $k=1$ dla funkcji grzbietowych (ang. ridge functions), w tym zapis algorytmu oraz metody wyboru optymalnego wektora kierunkowego $\hat{a}$.}
+
+W celu łagodnego wprowadzenia do metodyki odzyskiwania parametrów liniowych, analizę rozpoczynamy od najprostszego przypadku, w którym wymiar $k=1$. W tej sytuacji macierz parametrów $A$ redukuje się do pojedynczego wektora wierszowego $a = (a_1, \dots, a_d) \in \mathbb{R}^d$, o jednostkowej normie $\|a\|_{l_2^d} = 1$. Rozważana przez nas funkcja przyjmuje postać klasycznej funkcji grzbietowej (ang. ridge function):
+
+$$f(x) = g(a \cdot x),$$
+gdzie $g: B_{\mathbb{R}}(1+\bar{\epsilon}) \to \mathbb{R}$ jest nieznaną funkcją nieliniową. Podstawowym narzędziem wykorzystywanym do ekstrakcji informacji o wektorze $a$ z wartości funkcji $f$ jest rozwinięcie w szereg Taylora. Wybierając punkt próbkowania $\xi \in B_{\mathbb{R}^d}$ oraz wektor kierunkowy $\varphi \in B_{\mathbb{R}^d}(r)$ (przy czym długość kroku $\epsilon$ oraz promień $r$ spełniają warunek $r\epsilon \le \bar{\epsilon}$), pochodną kierunkową możemy przybliżyć za pomocą ilorazu różnicowego:
+$$[g'(a \cdot \xi)a] \cdot \varphi = \frac{f(\xi+\epsilon\varphi) - f(\xi)}{\epsilon} - \frac{\epsilon}{2}[\varphi^T \nabla^2 f(\zeta) \varphi]$$gdzie $\zeta$ jest odpowiednim punktem pośrednim z kuli $B_{\mathbb{R}^d}(1+\bar{\epsilon})$. Dzięki założeniom gładkościowym modelu, człon błędu zawierający hesjan $\nabla^2 f(\zeta)$ jest jednostajnie ograniczony. Aby przekształcić to pojedyncze równanie w układ pozwalający na zastosowanie metod próbkowania skompresowanego, algorytm generuje dwa losowe zbiory punktów:
+Zbiór $m_\mathcal{X}$ punktów próbkowania $\mathcal{X} = \{\xi_j \in \mathbb{S}^{d-1} : j = 1, \dots, m_\mathcal{X}\}$, wylosowanych zgodnie z jednostajną miarą powierzchniową $\mu_{\mathbb{S}^{d-1}}$ na sferze. Zbiór $m_\Phi$ kierunków $\Phi$, zdefiniowanych jako wektory losowe o składowych przyjmujących wartości z rozkładu Bernoulliego. Elementy te tworzą jednocześnie macierz pomiarową $\Phi$ o wymiarach $m_\Phi \times d$. Dla każdego punktu $\xi_j$ i kierunku $\varphi_i$, powyższe przybliżenie Taylora można zapisać w postaci zwartego równania macierzowego:
+$$Y = \Phi X + \mathcal{E}$$gdzie poszczególne macierze mają następujące znaczenie: $Y$ to macierz pomiarów o wymiarach $m_\Phi \times m_\mathcal{X}$, której elementy to ilorazy różnicowe $$y_{ij} = \frac{f(\xi_j+\epsilon\varphi_i) - f(\xi_j)}{\epsilon}.$$
+$\mathcal{E}$ to macierz błędów aproksymacji Taylora o elementach $$\epsilon_{ij} = \frac{\epsilon}{2}[\varphi_i^T \nabla^2 f(\zeta_{ij}) \varphi_i].$$
+$X$ to poszukiwana macierz o wymiarach $d \times m_\mathcal{X}$, której kolumny stanowią przeskalowane kopie poszukiwanego wektora $a^T$, to znaczy $x_j = g'(a \cdot \xi_j)a^T$.Ponieważ zakłada się, że wektor $a$ jest ściśliwy (może być dobrze aproksymowany przez wektor rzadki w normie $l_1$), każda kolumna macierzy $X$ dziedziczy tę własność. Pozwala to na niezależne odzyskanie kolumn macierzy $X$ na drodze klasycznej optymalizacji $l_1$, co stanowi fundament Algorytmu 1.
+
+\begin{algorithm}
+\caption{Algorytm aproksymacji dla $k = 1$}\label{alg:jednowymiarowy}
+\begin{algorithmic}
+    \State \textbf{Inicjalizacja i pomiary}: Dla zadanych parametrów $m_\Phi$ oraz $m_\mathcal{X}$, wygeneruj losowe zbiory $\Phi$ i $\mathcal{X}$, a następnie skonstruuj macierz różnic skończonych $Y$ opierając się na ewaluacjach czarnej skrzynki dla funkcji $f$.
+    \State \textbf{Minimalizacja $l_1$}: Dla każdej kolumny $y_j$ macierzy $Y$ (gdzie $j = 1, \dots, m_\mathcal{X}$), znajdź estymatę kierunku $\hat{x}_j = \Delta(y_j) := \arg\min_{\Phi z = y_j} \|z\|_{l_1^d}$.
+    \State \textbf{Wybór optymalnego kierunku}: Odnajdź indeks $j_0$ kolumny, dla której odzyskany wektor ma największą normę euklidesową (co minimalizuje wpływ szumu i błędów, wskazując punkt o największym gradiencie):
+        $$j_0 = \arg\max_{j=1,\dots,m_\mathcal{X}} \|\hat{x}_j\|_{l_2^d}$$
+    \State \textbf{Normalizacja}: Ostateczną estymatę wektora parametrów liniowych oblicz jako:
+        $$\hat{a} = \frac{\hat{x}_{j_0}}{\|\hat{x}_{j_0}\|_{l_2^d}}$$
+    \State \textbf{Konstrukcja funkcji aproksymującej}: Zdefiniuj jednowymiarową funkcję $\hat{g}(y) := f(\hat{a}^T y)$, a ostateczną, wysokowymiarową aproksymację jako $\hat{f}(x) := \hat{g}(\hat{a} \cdot x)$.
+\end{algorithmic}
+\end{algorithm}
+
+

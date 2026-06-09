@@ -1,0 +1,39 @@
+\subsection{Rozszerzenia modelu i ograniczenia praktyczne}
+
+We wcześniejszych podrozdziałach zakładaliśmy, że funkcja $f$ jest zdefiniowana na kuli jednostkowej $B_{\mathbb{R}^d}$ (z niewielkim marginesem $\bar{\epsilon}$) oraz że jej wartości mogą być mierzone z idealną precyzją bez żadnego błędu . W praktycznych zastosowaniach uczenia maszynowego rzadko dysponujemy tak komfortowymi warunkami. W niniejszym podrozdziale omówimy możliwości i ograniczenia naszej metody w obliczu zaszumionych pomiarów oraz dla dziedzin będących dowolnymi ciałami wypukłymi .
+
+\subsubsection{Stabilność numeryczna w obecności szumu pomiarowego}
+
+Załóżmy, że wartości funkcji podczas wyznaczania ilorazu różnicowego mogą być zmierzone jedynie z pewną skończoną precyzją. Równanie aproksymacji Taylora ulega modyfikacji i przyjmuje postać układu:
+$$\Phi X = Y - \mathcal{E} + \frac{\mathcal{W}}{\epsilon},$$
+gdzie $w_{ij}$ (elementy macierzy $\mathcal{W}$) reprezentują różnicę pomiędzy dokładną wartością różnicy $f(\xi_j+\epsilon\varphi_i) - f(\xi_j)$ a jej zmierzoną, zaszumioną wersją .
+
+Prowadzi to do zmodyfikowanego problemu próbkowania skompresowanego:
+$$Y = \Phi X + \mathcal{E} - \frac{\mathcal{W}}{\epsilon}.$$
+
+
+Aplikując Twierdzenie \ref{tw:aproksymacjaK-czlonowa}, musimy zastąpić deterministyczny błąd $\mathcal{E}$ wyrażeniem $\mathcal{E} - \mathcal{W}/\epsilon$. Jeśli założymy jedynie, że szum jest jednostajnie ograniczony (tzn. $|w_{ij}| \le \nu$), to norma błędu rośnie wraz z liczbą próbek: $\|w_j\|_{l_2^{m_\Phi}} \le \nu\sqrt{m_\Phi}$. Oznacza to, że im więcej punktów próbkujemy, tym bardziej wzmacniamy poziom szumu. Zjawisko to znane jest w literaturze pod nazwą zwijania szumu (ang. \textit{noise folding}) i stanowi istotne ograniczenie dla klasycznych estymat $l_1$ \cite{fornasier2012learning} .
+
+Aby przezwyciężyć ten problem, autorzy proponują zmianę paradygmatu i potraktowanie $w_{ij}$ jako losowego szumu o rozkładzie normalnym $\mathcal{N}(0, \sigma^2)$ . Zgodnie z wynikami Candèsa i Tao \cite{candes2007dantzig}, w takich warunkach minimalizacja $l_1$ (z użyciem estymatora zwanego Dantzig selector) pozwala na osiągnięcie błędu:
+$$\|x - \hat{x}\|_{l_2^d} \le C \cdot \sqrt{2 \log d} \cdot \sqrt{k+1} \cdot \sigma.$$
+
+Zauważmy, że w tym oszacowaniu błąd skaluje się niezwykle korzystnie względem wymiaru przestrzeni (jedynie jako $\sqrt{\log d}$) i jest niezależny od liczby pomiarów $m_\Phi$, co całkowicie eliminuje problem zwijania szumu .
+
+Eksperymenty numeryczne przeprowadzone w pracy \cite{fornasier2012learning} dla wymiaru $d=1000$ wyraźnie potwierdzają tę teoretyczną właściwość – współczynnik pomyślnej rekonstrukcji macierzy rzadkiej rośnie płynnie i stabilnie wraz ze spadkiem wariancji szumu bez drastycznych załamań przy dużej liczbie próbek .
+
+\subsubsection{Aproksymacja na dowolnych ciałach wypukłych}
+
+Uczenie funkcji wielowymiarowych często nie ogranicza się do kuli euklidesowej. Przedstawione algorytmy można uogólnić na dowolne, domknięte ciało wypukłe $\Omega \subset \mathbb{R}^d$ .
+
+Wymaga to dwóch modyfikacji modelu. Po pierwsze, macierz kowariancji gradientów wyznaczamy całkując po dziedzinie $\Omega$ względem zadanej miary probabilistycznej $\mu_\Omega$:
+$$H^f := \int_\Omega \nabla f(x)\nabla f(x)^T d\mu_\Omega(x).$$
+
+Po drugie, funkcja musi być zdefiniowana na $\epsilon$-otoczeniu dziedziny, tj. $\Omega + \bar{\epsilon} := \{x \in \mathbb{R}^d : \text{dist}(\Omega, x) \le \bar{\epsilon}\}$.
+
+Z perspektywy dowodu błędu (dla $k=1$), kluczowa różnica pojawia się w momencie definiowania ostatecznej aproksymacji $\hat{g}$. Dla dowolnego $y \in B_{\mathbb{R}}$ musimy algorytmicznie znaleźć punkt $x_y \in \Omega + \bar{\epsilon}$ taki, że $\hat{a} \cdot x_y = y$ . 
+
+Jeżeli operacja ta jest możliwa, Twierdzenie \ref{tw:zbieznoscalgorytmu1} nadal zachodzi, jednak oszacowanie ostatecznego błędu ulega powiększeniu o średnicę dziedziny (mierzoną w normie $l_2$):
+$$\|f - \hat{f}\|_\infty \le 2C_2(\text{diam}(\Omega) + 2\bar{\epsilon})\frac{\nu_1}{\sqrt{\alpha(1-s)} - \nu_1}.$$
+
+
+Głównym mankamentem tego uogólnienia jest fakt, że średnica $\text{diam}(\Omega) = \max_{x,x' \in \Omega} \|x-x'\|_{l_2^d}$ może rosnąć wraz z wymiarem. Przykładowo, dla hiperkostki $\Omega = [-1, 1]^d$ średnica wynosi $\sqrt{2d}$, co ponownie wprowadza zależność błędu od wymiaru $d$ \cite{fornasier2012learning} . Ograniczenie to stanowi otwarty problem badawczy, którego rozwiązanie może w przyszłości opierać się na funkcjonałach Minkowskiego i estymatach w dualnych normach $l_1$ .

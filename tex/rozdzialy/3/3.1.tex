@@ -1,0 +1,7 @@
+\subsection{Środowisko obliczeniowe i narzędzia programistyczne}
+
+Wszystkie eksperymenty numeryczne przedstawione w tym rozdziale zostały zaimplementowane i przeprowadzone w języku Python. Do operacji na wektorach, macierzach oraz do wydajnego próbkowania rozkładów prawdopodobieństwa wykorzystano bibliotekę \texttt{NumPy}. Dekompozycja według wartości osobliwych (SVD), kluczowa dla działania Algorytmu 2, została zrealizowana przy użyciu zoptymalizowanych procedur algebry liniowej z pakietu \texttt{SciPy} (\texttt{scipy.linalg.svd}).
+
+Zasadniczym elementem obliczeniowym obu algorytmów jest rozwiązanie problemu minimalizacji normy $l_1$. W implementacji problem ten został sformułowany jako zadanie optymalizacji wypukłej. Dla przypadku bezszumowego rozwiązywano klasyczny problem Basis Pursuit (BP), natomiast w scenariuszach uwzględniających zakłócenia (szum Gaussowski) wykorzystano relaksację typu Basis Pursuit De-Noising (BPDN) postaci:
+$$\min \|z\|_{l_1^d} \quad \text{pod warunkiem} \quad \|\Phi z - y\|_{l_2^{m_\Phi}} \le \delta$$
+gdzie parametr $\delta$ był kalibrowany w zależności od wariancji szumu.

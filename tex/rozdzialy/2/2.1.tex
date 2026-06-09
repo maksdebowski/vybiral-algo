@@ -1,0 +1,46 @@
+\subsection{Formalna definicja modelu i założenia gładkości}
+
+Aby precyzyjnie analizować problem uczenia wysokowymiarowych funkcji, musimy w pierwszej kolejności zdefiniować klasę obiektów, którymi będziemy się zajmować. Rozważamy funkcje $f$ zdefiniowane na rozszerzonej jednostkowej kuli euklidesowej $B_{\mathbb{R}^d}(1+\bar{\epsilon})$ (gdzie $\bar{\epsilon} > 0$ pozwala na analizę gradientów również na brzegu kuli $B_{\mathbb{R}^d}$). Zakładamy, że nasza funkcja celowa przyjmuje postać uogólnionego modelu:
+
+
+$$f(x) = g(Ax)$$
+
+Podejście to uogólnia prostsze modele badane wcześniej w literaturze (takie jak model jednego wektora stochastycznego czy funkcje zależne tylko od kilku aktywnych współrzędnych) poprzez wprowadzenie dowolnej macierzy parametrów liniowych.
+
+W modelu tym parametry i funkcje muszą spełniać następujące warunki, które warunkują sukces algorytmów uczenia:
+
+\subsubsection{Założenia dotyczące macierzy $A$ (parametry liniowe)}
+
+Macierz $A$ ma wymiary $k \times d$, gdzie wymiar ukryty $k$ jest zazwyczaj dużo mniejszy od wymiaru przestrzeni $d$ ($k \ll d$). Zakładamy, że wiersze tej macierzy należą do przestrzeni $l_q^d$ dla pewnego parametru $0 < q \le 1$, co gwarantuje ich „ściśliwość” (ang. *compressibility*). Oznacza to spełnienie nierówności:
+
+
+$$(\sum_{j=1}^d |a_{ij}|^q)^{1/q} \le C_1$$
+
+dla pewnej dodatniej stałej $C_1$.
+Co ciekawe, początkowa ogólność macierzy $A$ może zostać zredukowana. Wykorzystując zredukowany rozkład według wartości osobliwych (SVD), mianowicie $A = U \Sigma V^T$, możemy zdefiniować nową funkcję nieliniową $\tilde{g}(y) = g(U\Sigma y)$ oraz nową macierz parametrów $\tilde{A} = V^T$. Pozwala to – przy odpowiedniej modyfikacji stałych modelu – bez straty ogólności założyć, że macierz $A$ posiada ortonormalne wiersze, co zapisujemy jako $AA^T = I_k$.
+
+\subsubsection{Założenia dotyczące funkcji nieliniowej $g$}
+Funkcja $g$ musi być dobrze określona na obrazie dziedziny przekształconej przez macierz $A$, to znaczy na zbiorze $B_{\mathbb{R}^k}(1+\bar{\epsilon})$. Aby nasze algorytmy mogły opierać się na rozwinięciu Taylora, wymagamy odpowiedniej gładkości. Oczekujemy, że $g \in C^2(B_{\mathbb{R}^k}(1+\bar{\epsilon}))$. Co więcej, wartości funkcji oraz jej pochodne do drugiego rzędu włącznie muszą być jednostajnie ograniczone przez stałą $C_2$:
+
+
+$$\max_{|\alpha|\le 2} \|D^\alpha g\|_\infty \le C_2.$$
+
+
+\subsubsection{Warunek dobrego uwarunkowania (macierz $H^f$)}
+Same założenia o gładkości i ściśliwości nie są wystarczające do uniknięcia klątwy wymiarowości. Jeżeli funkcja byłaby "zbyt płaska" w kierunkach zdefiniowanych przez macierz $A$, zlokalizowanie tych kierunków na podstawie losowych próbek wymagałoby wykładniczej liczby zapytań. Aby zapobiec takiej sytuacji, wprowadzamy macierz kowariancji gradientów $H^f$, zdefiniowaną jako całka na sferze $\mathbb{S}^{d-1}$ względem rotacyjnie niezmienniczej miary jednostajnej $\mu_{\mathbb{S}^{d-1}}$:
+
+
+$$H^f := \int_{\mathbb{S}^{d-1}} \nabla f(x)\nabla f(x)^T d\mu_{\mathbb{S}^{d-1}}(x).$$
+
+
+Wykorzystując regułę łańcuchową, możemy zauważyć, że $\nabla f(x) = A^T \nabla g(Ax)$, przez co otrzymujemy zależność:
+
+
+$$H^f = A^T \cdot \int_{\mathbb{S}^{d-1}} \nabla g(Ax)\nabla g(Ax)^T d\mu_{\mathbb{S}^{d-1}}(x) \cdot A.$$
+
+Z tożsamości tej wprost wynika, że rząd macierzy $H^f$ wynosi co najwyżej $k$. Dla naszego problemu kluczowe jest założenie o silnym uwarunkowaniu tej macierzy. Żądamy, aby jej wartości osobliwe były istotnie oddzielone od zera:
+
+
+$$\sigma_1(H^f) \ge \dots \ge \sigma_k(H^f) \ge \alpha > 0$$
+
+dla ustalonej stałej $\alpha > 0$. Warunek ten, stanowiący rdzeń całej analizy, gwarantuje nam, że sygnał pochodzący z aktywnych parametrów liniowych nie zniknie w zgiełku wysokich wymiarów.

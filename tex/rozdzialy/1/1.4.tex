@@ -1,0 +1,11 @@
+\subsection{Gwarancje probabilistyczne i stabilność podprzestrzeni}
+
+
+Ze względu na stochastyczną naturę naszych algorytmów, dowody ich poprawności oprzemy o twierdzenia pozwalające szacować prawdopodobieństwo dużych odchyleń od wartości oczekiwanej. Podstawowym narzędziem dla przypadku jednowymiarowego będzie Nierówność Hoeffdinga, zapewniająca nas, że suma niezależnych, ograniczonych zmiennych losowych $X_j \in [a_j, b_j]$ rzadko odbiega od swojej średniej:
+
+$$\mathbb{P}\{ |\sum_{j=1}^m X_j - \mathbb{E}(\sum_{j=1}^m X_j)| [cite_start]\ge t \} \le 2e^{-\frac{2t^2}{\sum_{j=1}^m (b_j - a_j)^2}}.$$
+
+Gdy przejdziemy do uogólnionego modelu dla $k>1$, analizie będą podlegać sumy losowych macierzy próbkowania. Posłużymy się w tym celu Macierzową Nierównością Chernoffa, która dla sumy dodatnio półokreślonych macierzy $X_j$ (przy ograniczeniu $\sigma_1(X_j) \le C$) określa prawdopodobieństwo odchylenia największej wartości osobliwej od średniej $\mu_{max}$:
+$$\mathbb{P}\{\sigma_1(\sum_{j=1}^m X_j) - \mu_{max} \ge s\mu_{max}\} \le k(\frac{(1+s)}{e})^{-\frac{\mu_{max}(1+s)}{C}}.$$
+
+Wreszcie, ponieważ nasz algorytm będzie w stanie wygenerować jedynie szacunkową macierz (różniącą się minimalnie od "prawdziwej"), konieczne będzie udowodnienie, że błąd w wartościach macierzy nie popsuje drastycznie obliczonych kierunków głównych. Zapewnia to Twierdzenie Wedina o ograniczeniu perturbacji. Gwarantuje ono stabilność podprzestrzeni niezmienniczych — pod warunkiem, że istotne wartości osobliwe są od siebie odseparowane o minimum $\bar{\alpha} > 0$, błąd podprzestrzeni można bezpiecznie ograniczyć błędem Frobeniusa między macierzami: $\|V_1 V_1^T - \hat{V}_1 \hat{V}_1^T\|_F \le \frac{2}{\bar{\alpha}}\|B - \hat{B}\|_F$.

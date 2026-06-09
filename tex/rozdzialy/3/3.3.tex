@@ -1,0 +1,20 @@
+\subsubsection{Zbieżność Algorytmu 1}
+Dla Algorytmu 1 wygenerowano funkcję testową $f(x) = \cos(\pi \cdot a^T x)$, gdzie poszukiwany wektor parametrów liniowych $a$ charakteryzował się rzadkością $s=3$. Wyniki błędu rekonstrukcji wektora $a$ w zależności od liczby kierunków pomiarowych $m_\Phi$ przedstawiono na Rysunku \ref{fig:alg1-convergence}. 
+
+Zgodnie z przewidywaniami z Twierdzenia \ref{tw:zbieznoscalgorytmu1}, błąd rekonstrukcji $\min_{\pm} \|a - (\pm\hat{a})\|_2$ systematycznie maleje wraz ze wzrostem liczby pomiarów $m_\Phi$. Co istotne, przy stałej liczbie pomiarów $m_\Phi$, wyższy wymiar przestrzeni $d$ przynosił niekiedy nieco stabilniejsze rezultaty, co jest konsekwencją faktu, że dla stałej rzadkości sygnału macierze Bernoulliego wykazują lepsze własności izometryczne (RIP), gdy stosunek $m_\Phi/d$ jest odpowiednio dobrany.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.9\textwidth]{figures/fig1_alg1_convergence.pdf}
+    \caption{Algorytm 1: Błąd rekonstrukcji wektora $a$ w zależności od liczby kierunków pomiarowych $m_\Phi$ dla wymiarów $d \in \{50, 100, 200\}$. Parametry: $m_\mathcal{X} = 30$, $\varepsilon = 0.1$.}
+    \label{fig:alg1-convergence}
+\end{figure}
+
+Działanie mechanizmu promującego rzadkość w minimalizacji $l_1$ uwidacznia Rysunek \ref{fig:alg1-vector}. Algorytm precyzyjnie lokalizuje aktywne współrzędne prawdziwego wektora $a$ (indeksy 0, 1, 2). Wykres błędów bezwzględnych pokazuje, że szum rekonstrukcyjny (artefakty) dla pozostałych wymiarów jest marginalny i utrzymuje się na bardzo niskim poziomie.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.9\textwidth]{figures/fig2_alg1_vector.pdf}
+    \caption{Porównanie prawdziwego wektora $a$ i zrekonstruowanego $\hat{a}$ w Algorytmie 1 (góra) oraz rozkład błędu bezwzględnego na poszczególnych współrzędnych (dół). Parametry: $d = 100$, $m_\Phi = 50$, $m_\mathcal{X} = 25$.}
+    \label{fig:alg1-vector}
+\end{figure}

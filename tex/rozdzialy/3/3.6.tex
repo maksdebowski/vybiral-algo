@@ -1,0 +1,19 @@
+\subsection{Doświadczenia numeryczne w obecności szumu}
+
+Zbadanie zachowania algorytmu w środowisku zaburzonym jest niezbędne do analizy jego użyteczności. Zgodnie z modelem teoretycznym, błąd przybliżenia pochodnych opiera się na kroku różnicy skończonej $\varepsilon$. W scenariuszu bezszumowym, im mniejsze $\varepsilon$, tym lepsze oszacowanie z wzoru Taylora. Sytuacja ulega jednak dramatycznej zmianie po wprowadzeniu zakłóceń (Rysunek \ref{fig:epsilon-sensitivity}). Dzielenie zaszumionego pomiaru przez bardzo małe $\varepsilon$ drastycznie amplifikuje błąd, prowadząc do tzw. zwijania szumu (ang. \textit{noise folding}). Z tego powodu wykres zaszumiony wykazuje silne optimum dla większych wartości kroku ($\varepsilon \ge 0.5$).
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.9\textwidth]{figures/fig5_epsilon_sensitivity.pdf}
+    \caption{Wpływ parametru $\varepsilon$ na jakość rekonstrukcji w wariantach z szumem ($\sigma=0.01$) oraz bez szumu. Dla zaszumionych pomiarów widoczne jest drastyczne zjawisko amplifikacji błędu dla małych wartości $\varepsilon$.}
+    \label{fig:epsilon-sensitivity}
+\end{figure}
+
+Potwierdzenie tej zależności uwidacznia analiza bezpośredniej odporności na szum Gaussowski z odchyleniem standardowym $\sigma$ (Rysunek \ref{fig:noise-robustness}). Przy małym $\varepsilon=0.1$ algorytm jest niezwykle precyzyjny dla mikro-zakłóceń, lecz przechodzi ostre "przejście fazowe" i traci swoje właściwości odzyskiwania powyżej $\sigma \approx 0.002$. Wypłaszczenie tego przejścia można uzyskać kosztem bazowej precyzji, ustawiając wyższe $\varepsilon=0.5$. Algorytm wówczas działa w pełni poprawnie dla szumów rzędu $\sigma \approx 0.01$, co dowodzi skuteczności relaksacji BPDN jako remedium na umiarkowane zakłócenia \cite{fornasier2012learning, candes2007dantzig}.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.9\textwidth]{figures/fig6_alg1_noise.pdf}
+    \caption{Odporność Algorytmu 1 na szum Gaussowski $\mathcal{N}(0, \sigma^2)$ w zależności od przyjętego kroku $\varepsilon$. Obserwuje się przejście fazowe, które można przesuwać w prawo (zwiększać tolerancję) za cenę wyższego błędu resztkowego.}
+    \label{fig:noise-robustness}
+\end{figure}

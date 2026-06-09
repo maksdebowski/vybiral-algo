@@ -1,0 +1,38 @@
+\subsection{Rekonstrukcja w przypadku ogólnym (Algorytm 2) – Przedstawienie kroków drugiego algorytmu ($k \ge 1$), ze szczególnym uwzględnieniem roli rozkładu SVD w stabilnej ekstrakcji podprzestrzeni.}
+
+    W tym podrozdziale uogólniamy nasze rozważania na przypadek, w którym wymiar ukryty $k \ge 1$. Rozważamy tu funkcje określane mianem $k$-grzbietowych (ang. $k$-ridge functions), zdefiniowane jako $f(x) = g(Ax)$.
+Zakładamy ponownie, że $A$ jest macierzą wymiaru $k \times d$ o ortonormalnych wierszach ($AA^T = I_k$), a $g: B_{\mathbb{R}^k}(1+\bar{\epsilon}) \to \mathbb{R}$ jest funkcją klasy $C^2$.
+Podobnie jak w przypadku jednowymiarowym, punktem wyjścia jest przybliżenie pochodnej kierunkowej za pomocą twierdzenia Taylora.
+Dla punktu $\xi \in B_{\mathbb{R}^d}$ oraz kierunku $\varphi \in B_{\mathbb{R}^d}(r)$, otrzymujemy tożsamość:
+
+$$[\nabla g(A\xi)^T A]\varphi = \frac{f(\xi+\epsilon\varphi) - f(\xi)}{\epsilon} - \frac{\epsilon}{2}[\varphi^T \nabla^2 f(\zeta) \varphi],$$
+gdzie $\zeta(\xi,\varphi) \in B_{\mathbb{R}^d}(1+\bar{\epsilon})$.
+Rozważając to równanie dla $m_\Phi$ kierunków ze zbioru $\Phi$ oraz $m_\mathcal{X}$ punktów próbkowania ze zbioru $\mathcal{X}$, możemy zbudować analogiczny układ macierzowy.
+
+Zbieramy pochodne kierunkowe w macierz $X$ wymiaru $d \times m_\mathcal{X}$:
+
+$$X = (A^T \nabla g(A\xi_1), \dots, A^T \nabla g(A\xi_{m_\mathcal{X}})),$$
+co pozwala nam zapisać faktoryzację:
+
+$$\Phi X = Y - \mathcal{E},$$
+gdzie $Y$ i $\mathcal{E}$ to odpowiednio macierze różnic skończonych i błędów.
+Zauważmy jednak kluczową różnicę strukturalną. Macierz $X$ możemy rozłożyć jako $X = A^T \mathcal{G}^T$, gdzie $\mathcal{G} = (\nabla g(A\xi_1)^T | \dots | \nabla g(A\xi_{m_\mathcal{X}})^T)^T$.
+Oznacza to, że kolumny macierzy $X$ nie są już przeskalowanymi kopiami jednego wektora, lecz stanowią kombinacje liniowe $k$ ściśliwych wektorów (wierszy macierzy $A$). Dzięki temu wciąż możemy stabilnie odzyskać poszczególne kolumny $X$ z kolumn $Y$ wykorzystując minimalizację $l_1$.
+\subsubsection{Rola rozkładu SVD w ekstrakcji podprzestrzeni}
+Odzyskanie przybliżenia $\hat{X}$ to jednak nie koniec. Skoro macierz $A$ ma rząd $k$, to – zakładając, że $\mathcal{G}^T$ ma pełny rząd – również macierz $X$ będzie miała rząd $k$. Jeżeli wykonamy rozkład według wartości osobliwych (SVD) dla macierzy $X^T = U S V^T$, przestrzeń rozpięta przez prawe wektory osobliwe będzie pokrywać się z przestrzenią rozpiętą przez wiersze macierzy $A$, co oznacza, że $A^T A = V V^T$.
+Daje to nam możliwość alternatywnej reprezentacji funkcji $f$:
+$$f(x) = g(Ax) = g(AA^T Ax) = g(AVV^T x) =: \tilde{g}(V^T x)$$gdzie $\tilde{g}(y) := g(AVy) = f(Vy)$.
+Zatem, jeśli $\hat{X}$ jest dobrym przybliżeniem $X$, możemy oczekiwać, że pierwsze $k$ prawych wektorów osobliwych macierzy $\hat{X}$ wyznaczy podprzestrzeń bardzo bliską tej rozpiętej przez $A$. Stanowi to fundament poniższego algorytmu.
+\subsubsection{Algorytm 2}
+\begin{algorithm}
+\caption{Algorytm aproksymacji dla $k \geq 1$}\label{alg:wielowymiarowy}
+    \begin{algorithmic}
+        \State \textbf{Pomiary}: Dla zadanych $m_\Phi, m_\mathcal{X}$, wylosuj zbiory $\Phi$ i $\mathcal{X}$, a następnie skonstruuj macierz $Y$ wykorzystując ilorazy różnicowe.
+        \State \textbf{Minimalizacja $l_1$}: Wyznacz przybliżenie każdej kolumny macierzy rozwiązując:$$\hat{x}_j = \Delta(y_j) := \arg\min_{\Phi z = y_j} \|z\|_{l_1^d}$$dla $j = 1, \dots, m_\mathcal{X}$, tworząc w ten sposób macierz $\hat{X} = (\hat{x}_1, \dots, \hat{x}_{m_\mathcal{X}})$.
+        \State \textbf{Rozkład SVD}: Oblicz rozkład według wartości osobliwych dla przetransponowanej macierzy estymat:$$\hat{X}^T = \begin{pmatrix} \hat{U}_1 & \hat{U}_2 \end{pmatrix} \begin{pmatrix} \hat{\Sigma}_1 & 0 \\ 0 & \hat{\Sigma}_2 \end{pmatrix} \begin{pmatrix} \hat{V}_1^T \\ \hat{V}_2^T \end{pmatrix},$$gdzie diagonalna podmacierz $\hat{\Sigma}_1$ zawiera $k$ największych wartości osobliwych.
+        \State \textbf{Ekstrakcja macierzy}: Zdefiniuj szukaną macierz parametrów liniowych jako $\hat{A} = \hat{V}_1^T$.
+        \State \textbf{Aproksymacja ostateczna}: Określ nową funkcję nieliniową $\hat{g}(y) := f(\hat{A}^T y)$, co pozwala na ostateczną aproksymację $\hat{f}(x) := \hat{g}(\hat{A}x)$.
+    \end{algorithmic}
+\end{algorithm}
+
+Kluczem do sukcesu Algorytmu 2 jest stabilność rozkładu SVD. Jakość końcowej aproksymacji zależy tu podwójnie: po pierwsze, od błędu rekonstrukcji z użyciem $l_1$ (kontrolowanego przez liczbę pomiarów $m_\Phi$); po drugie, od stabilności podprzestrzeni rozpiętej przez $V^T$, która wymaga, aby wartości osobliwe macierzy $X$ były wyraźnie oddzielone od zera (co jest zależne od liczby próbek $m_\mathcal{X}$).

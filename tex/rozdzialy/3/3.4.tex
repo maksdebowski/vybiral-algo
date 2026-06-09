@@ -1,0 +1,18 @@
+\subsubsection{Wielowymiarowa rekonstrukcja (Algorytm 2)}
+W przypadku ogólnym ($k \ge 1$), testy przeprowadzono dla funkcji testowej $f(x) = \|Ax\|_{l_2}^2$, gdzie $A$ jest rzadką macierzą. Rysunek \ref{fig:alg2-convergence} ilustruje zbieżność błędu podprzestrzeni mierzoną normą Frobeniusa $\|A^T A - \hat{A}^T \hat{A}\|_F$. Potwierdzono wnioski z Twierdzenia \ref{tw:zbieznoscalgorytmu2}: wyższy wymiar $k$ (większa liczba aktywnych kombinacji liniowych) podnosi złożoność problemu i wymaga większej liczby pomiarów $m_\Phi$ do osiągnięcia porównywalnego błędu.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.9\textwidth]{figures/fig3_alg2_convergence.pdf}
+    \caption{Algorytm 2: Błąd rekonstrukcji podprzestrzeni $\|A^T A - \hat{A}^T \hat{A}\|_F$ w zależności od $m_\Phi$ dla $k \in \{2, 3\}$. Parametry: $d=80, m_\mathcal{X}=40, \varepsilon=0.1$.}
+    \label{fig:alg2-convergence}
+\end{figure}
+
+Kluczowym elementem Algorytmu 2 jest rozkład SVD. Jak widać na Rysunku \ref{fig:alg4-singular-values}, wartości osobliwe zrekonstruowanej macierzy $\hat{X}^T$ wykazują niezwykle wyraźną przerwę spektralną (ang. \textit{spectral gap}) między $\sigma_k$ a $\sigma_{k+1}$. Gwarantuje to spełnienie założeń Twierdzenia Wedina \cite{wedin1972perturbation} i pozwala na stabilną ekstrakcję szukanej bazy z prawych wektorów osobliwych.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.9\textwidth]{figures/fig4_alg2_singular_values.pdf}
+    \caption{Wartości osobliwe macierzy $\hat{X}^T$ dla $k=2$. Widoczna wyraźna przerwa spektralna pozwala na poprawną identyfikację wymiaru ukrytego. Parametry: $d=80, m_\Phi=50, m_\mathcal{X}=40$.}
+    \label{fig:alg4-singular-values}
+\end{figure}
