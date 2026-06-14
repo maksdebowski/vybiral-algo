@@ -1,13 +1,13 @@
 """
-Implementacja Algorytmu 1 (k=1) i Algorytmu 2 (k≥1)
+Implementacja Algorytmu 1 ($k=1$) i Algorytmu 2 ($k \geq 1$)
 z pracy Fornasiera, Schnassa i Vybirala:
 "Learning Functions of Few Arbitrary Linear Parameters in High Dimensions"
 
-Algorytm 1 — odzyskiwanie pojedynczego wektora kierunkowego a
-              dla funkcji grzbietowej f(x) = g(a · x).
+Algorytm 1 -- odzyskiwanie pojedynczego wektora kierunkowego $a$
+              dla funkcji grzbietowej $f(x) = g(a \cdot x)$.
 
-Algorytm 2 — odzyskiwanie macierzy parametrów A (k × d)
-              dla k-grzbietowej f(x) = g(Ax) za pomocą SVD.
+Algorytm 2 -- odzyskiwanie macierzy parametrów $A$ ($k \times d$)
+              dla $k$-grzbietowej $f(x) = g(Ax)$ za pomocą SVD.
 """
 
 import numpy as np
@@ -21,26 +21,26 @@ def _build_finite_differences(
     f: callable, Xi: NDArray, Phi_rows: NDArray, epsilon: float
 ) -> NDArray:
     """
-    Konstruuje macierz Y ilorazów różnicowych (finite differences).
+    Konstruuje macierz $Y$ ilorazów różnicowych (finite differences).
 
-    y_{ij} = [f(ξ_j + ε·φ_i) - f(ξ_j)] / ε
+    $$ y_{ij} = \frac{f(\xi_j + \epsilon \cdot \phi_i) - f(\xi_j)}{\epsilon} $$
 
     Parametry
     ----------
     f : callable
-        Funkcja czarnej skrzynki f: R^d → R.
+        Funkcja czarnej skrzynki $f: \mathbb{R}^d \rightarrow \mathbb{R}$.
     Xi : NDArray o kształcie (m_X, d)
         Punkty próbkowania na sferze.
     Phi_rows : NDArray o kształcie (m_Phi, d)
-        Kierunki pomiarowe (wiersze macierzy Φ, ale NIEPRZESKALOWANE,
-        tj. φ_i z norma ≈ √(d/m_Phi)).
+        Kierunki pomiarowe (wiersze macierzy $\Phi$, ale NIEPRZESKALOWANE,
+        tj. $\phi_i$ z normą $\approx \sqrt{d/m_\Phi}$).
     epsilon : float
-        Krok różnicy skończonej ε > 0.
+        Krok różnicy skończonej $\epsilon > 0$.
 
     Zwraca
     -------
     NDArray o kształcie (m_Phi, m_X)
-        Macierz Y.
+        Macierz $Y$.
     """
     m_Phi = Phi_rows.shape[0]
     m_X = Xi.shape[0]
@@ -66,21 +66,21 @@ def algorithm1(
     verbose: bool = False,
 ) -> tuple[NDArray, callable]:
     """
-    Algorytm 1 — aproksymacja funkcji grzbietowej f(x) = g(a · x)
-    dla przypadku k = 1.
+    Algorytm 1 -- aproksymacja funkcji grzbietowej $f(x) = g(a \cdot x)$
+    dla przypadku $k = 1$.
 
     Kroki:
-    1. Wylosuj zbiory Φ (m_Φ kierunków Bernoulliego) i X (m_X punktów na sferze).
-    2. Skonstruuj macierz Y ilorazów różnicowych.
-    3. Dla każdej kolumny y_j rozwiąż min ||z||_{l1} s.t. Φz = y_j → x̂_j.
-    4. Znajdź j_0 = argmax_j ||x̂_j||_{l2}.
-    5. Znormalizuj: â = x̂_{j0} / ||x̂_{j0}||_{l2}.
-    6. Zdefiniuj ĝ(y) = f(â^T · y) i f̂(x) = ĝ(â · x).
+    1. Wylosuj zbiory $\Phi$ ($m_\Phi$ kierunków Bernoulliego) i $X$ ($m_X$ punktów na sferze).
+    2. Skonstruuj macierz $Y$ ilorazów różnicowych.
+    3. Dla każdej kolumny $y_j$ rozwiąż $\min \|z\|_{\ell_1}$ s.t. $\Phi z = y_j \rightarrow \hat{x}_j$.
+    4. Znajdź $j_0 = \mathrm{argmax}_j \|\hat{x}_j\|_2$.
+    5. Znormalizuj: $\hat{a} = \hat{x}_{j_0} / \|\hat{x}_{j_0}\|_2$.
+    6. Zdefiniuj $\hat{g}(y) = f(\hat{a}^T \cdot y)$ i $\hat{f}(x) = \hat{g}(\hat{a} \cdot x)$.
 
     Parametry
     ----------
     f : callable
-        Funkcja czarnej skrzynki f: R^d → R.
+        Funkcja czarnej skrzynki $f: \mathbb{R}^d \rightarrow \mathbb{R}$.
     d : int
         Wymiar przestrzeni.
     m_Phi : int
@@ -100,22 +100,22 @@ def algorithm1(
     Zwraca
     -------
     a_hat : NDArray o kształcie (d,)
-        Estymata wektora kierunkowego â.
+        Estymata wektora kierunkowego $\hat{a}$.
     f_hat : callable
-        Funkcja aproksymująca f̂(x) = f(â^T (â · x)).
+        Funkcja aproksymująca $\hat{f}(x) = f(\hat{a}^T (\hat{a} \cdot x))$.
     """
     if rng is None:
         rng = np.random.default_rng()
 
     # (1) Losowanie zbiorów
-    Xi = sample_sphere(d, m_X, rng)  # m_X × d
-    Phi = bernoulli_matrix(m_Phi, d, rng)  # m_Phi × d
+    Xi = sample_sphere(d, m_X, rng)  # m_X \times d
+    Phi = bernoulli_matrix(m_Phi, d, rng)  # m_Phi \times d
 
-    # Kierunki φ_i z (16): wiersze Φ to już φ_i / √m_Phi,
-    # ale w ilorazie różnicowym potrzebujemy φ_i ∈ B(√(d/m_Phi)).
-    # Wiersze Phi mają normę ≈ √(d/m_Phi) po przeskalowaniu 1/√m_Phi.
+    # Kierunki $\phi_i$ z (16): wiersze $\Phi$ to już $\phi_i / \sqrt{m_\Phi}$,
+    # ale w ilorazie różnicowym potrzebujemy $\phi_i \in B(\sqrt{d/m_\Phi})$.
+    # Wiersze Phi mają normę $\approx \sqrt{d/m_\Phi}$ po przeskalowaniu $1/\sqrt{m_\Phi}$.
     # Używamy wierszy Phi bezpośrednio jako kierunków w finite diff.
-    Phi_directions = Phi  # norma wiersza ≈ √(d/m_Phi)
+    Phi_directions = Phi  # norma wiersza $\approx \sqrt{d/m_\Phi}$
 
     # (2) Macierz Y ilorazów różnicowych
     Y = _build_finite_differences(f, Xi, Phi_directions, epsilon)
@@ -130,7 +130,7 @@ def algorithm1(
     for j in range(m_X):
         y_j = Y[:, j]
         if noise_sigma > 0:
-            # Tolerancja = szum pomiarowy (σ√m/ε) + residuum Taylora (~5% ||y||)
+            # Tolerancja = szum pomiarowy ($\sigma\sqrt{m}/\epsilon$) + residuum Taylora (~5% $\|y\|$)
             noise_tol = noise_sigma * np.sqrt(m_Phi) / epsilon
             taylor_tol = 0.05 * np.linalg.norm(y_j)
             X_hat[:, j] = l1_minimize(Phi, y_j, tol=noise_tol + taylor_tol + 1e-6)
@@ -145,7 +145,7 @@ def algorithm1(
     j0 = np.argmax(norms)
 
     if verbose:
-        print(f"  j0 = {j0}, ||x̂_j0||_2 = {norms[j0]:.6f}")
+        print(f"  j0 = {j0}, \|\hat{x}_{j_0}\|_2 = {norms[j0]:.6f}")
 
     # (5) Normalizacja
     a_hat = X_hat[:, j0]
@@ -154,10 +154,10 @@ def algorithm1(
     else:
         raise RuntimeError(
             "Algorytm 1: nie udało się odzyskać wektora kierunkowego "
-            "(norma ≈ 0). Zwiększ m_Φ lub m_X."
+            "(norma $\\approx$ 0). Zwiększ $m_\\Phi$ lub $m_X$."
         )
 
-    # (6) Konstrukcja f̂
+    # (6) Konstrukcja $\hat{f}$
     def f_hat(x):
         return f(a_hat * (a_hat @ x))
 
@@ -176,15 +176,15 @@ def algorithm2(
     verbose: bool = False,
 ) -> tuple[NDArray, callable]:
     """
-    Algorytm 2 — aproksymacja funkcji k-grzbietowej f(x) = g(Ax)
-    dla przypadku k ≥ 1.
+    Algorytm 2 -- aproksymacja funkcji k-grzbietowej $f(x) = g(Ax)$
+    dla przypadku $k \geq 1$.
 
     Kroki:
-    1. Wylosuj zbiory Φ i X, skonstruuj macierz Y.
-    2. Dla każdej kolumny y_j: x̂_j = argmin ||z||_{l1} s.t. Φz = y_j.
-    3. SVD transpozycji X̂^T = Û₁ Σ̂₁ V̂₁^T + Û₂ Σ̂₂ V̂₂^T.
-    4. Â = V̂₁^T (k prawych wektorów osobliwych).
-    5. ĝ(y) = f(Â^T y), f̂(x) = ĝ(Âx).
+    1. Wylosuj zbiory $\Phi$ i $X$, skonstruuj macierz $Y$.
+    2. Dla każdej kolumny $y_j$: $\hat{x}_j = \mathrm{argmin} \|z\|_{\ell_1}$ s.t. $\Phi z = y_j$.
+    3. SVD transpozycji $\hat{X}^T = \hat{U}_1 \hat{\Sigma}_1 \hat{V}_1^T + \hat{U}_2 \hat{\Sigma}_2 \hat{V}_2^T$.
+    4. $\hat{A} = \hat{V}_1^T$ ($k$ prawych wektorów osobliwych).
+    5. $\hat{g}(y) = f(\hat{A}^T y)$, $\hat{f}(x) = \hat{g}(\hat{A}x)$.
 
     Parametry
     ----------
@@ -210,9 +210,9 @@ def algorithm2(
     Zwraca
     -------
     A_hat : NDArray o kształcie (k, d)
-        Estymata macierzy parametrów Â.
+        Estymata macierzy parametrów $\hat{A}$.
     f_hat : callable
-        Funkcja aproksymująca f̂(x) = f(Â^T (Â x)).
+        Funkcja aproksymująca $\hat{f}(x) = f(\hat{A}^T (\hat{A} x))$.
     """
     if rng is None:
         rng = np.random.default_rng()
@@ -243,22 +243,22 @@ def algorithm2(
         if verbose and (j + 1) % max(1, m_X // 5) == 0:
             print(f"  l1-min: kolumna {j+1}/{m_X} zakończona")
 
-    # (4) SVD transpozycji X̂^T
-    # X̂ ma wymiar d × m_X, więc X̂^T ma wymiar m_X × d
+    # (4) SVD transpozycji $\hat{X}^T$
+    # $\hat{X}$ ma wymiar $d \times m_X$, więc $\hat{X}^T$ ma wymiar $m_X \times d$
     U, S, Vt = np.linalg.svd(X_hat.T, full_matrices=False)
 
     if verbose:
-        print(f"  Wartości osobliwe X̂^T: {S[:min(k+2, len(S))]}")
+        print(f"  Wartości osobliwe \hat{{X}}^T: {S[:min(k+2, len(S))]}")
         if k < len(S):
             print(
-                f"  Przerwa spektralna: σ_{k} = {S[k-1]:.6f}, "
-                f"σ_{k+1} = {S[k] if k < len(S) else 0:.6f}"
+                f"  Przerwa spektralna: \sigma_{k} = {S[k-1]:.6f}, "
+                f"\sigma_{{k+1}} = {S[k] if k < len(S) else 0:.6f}"
             )
 
     # k prawych wektorów osobliwych (wiersze V^T)
     A_hat = Vt[:k, :]  # kształt (k, d)
 
-    # (5) Konstrukcja f̂
+    # (5) Konstrukcja $\hat{f}$
     def f_hat(x):
         return f(A_hat.T @ (A_hat @ x))
 
@@ -277,11 +277,11 @@ def identify_active_coordinates(
     rng: np.random.Generator | None = None,
 ) -> list[int]:
     """
-    Identyfikacja aktywnych współrzędnych funkcji f na podstawie
-    odzyskanej macierzy Â.
+    Identyfikacja aktywnych współrzędnych funkcji $f$ na podstawie
+    odzyskanej macierzy $\hat{A}$.
 
-    Współrzędna j jest uznana za aktywną, jeśli norma kolumny j
-    macierzy Â^T przekracza próg (threshold).
+    Współrzędna $j$ jest uznana za aktywną, jeśli norma kolumny $j$
+    macierzy $\hat{A}^T$ przekracza próg (threshold).
 
     Procedura odpowiada eksperymentowi z Figure 2 pracy Vybirala.
 
