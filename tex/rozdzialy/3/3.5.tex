@@ -1,9 +1,0 @@
-\subsubsection{Skalowanie z wymiarem (klątwa wymiarowości)}
-Najważniejszy wniosek płynący z analizy teoretycznej mówi o wielomianowej (a w niektórych przypadkach silnie wielomianowej) traktowalności problemu. Rysunek \ref{fig:dimension-scaling} dowodzi, że błąd rekonstrukcji pozostaje w reżimie użytecznym nawet wtedy, gdy liczba pomiarów $m_\Phi$ jest stała dla rosnących wymiarów $d$ (Panel A). Skalowanie $m_\Phi$ logarytmicznie względem wymiaru przestrzeni, $m_\Phi = \lceil 10 \ln d \rceil$ (Panel B), pozwala utrzymać niską, stabilną wartość błędu. Udowadnia to empirycznie, że złożoność problemu dla funkcji o rzadkich parametrach rośnie co najwyżej proporcjonalnie do $\mathcal{O}(\log d)$, całkowicie omijając klątwę wymiarowości.
-
-\begin{figure}[htbp]
-    \centering
-    \includegraphics[width=1.0\textwidth]{figures/fig7_dimension_scaling.pdf}
-    \caption{Skalowanie błędu Algorytmu 1 ze wzrostem wymiaru przestrzeni $d$ dla stałej rzadkości sygnału $s=3$. Lewy panel: stałe $m_\Phi=40$. Prawy panel: logarytmiczne skalowanie pomiarów $m_\Phi = \lceil 10 \ln d \rceil$.}
-    \label{fig:dimension-scaling}
-\end{figure}

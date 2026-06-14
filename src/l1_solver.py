@@ -14,11 +14,15 @@ from numpy.typing import NDArray
 
 
 def l1_minimize(
-    Phi: NDArray, y: NDArray, solver: str = "SCS", tol: float = 1e-4
+    Phi: NDArray, y: NDArray, solver: str = "CLARABEL", tol: float | None = None
 ) -> NDArray:
     """
-    Rozwiązuje problem basis pursuit (z niewielką tolerancją numeryczną):
+    Rozwiązuje problem basis pursuit (BPDN):
         x̂ = argmin ||z||_{l1^d}  subject to  ||Φz - y||_2 ≤ tol
+
+    Jeśli tol=None, tolerancja jest estymowana automatycznie jako
+    ε_mach · ||y||_2 · √d, co odpowiada spodziewanemu residuum
+    aproksymacji Taylora w różnicach skończonych.
 
     Parametry
     ----------
@@ -27,16 +31,20 @@ def l1_minimize(
     y : NDArray o kształcie (m,)
         Wektor obserwacji (kolumna macierzy Y).
     solver : str
-        Solver CVXPY do użycia (domyślnie "SCS").
-    tol : float
-        Tolerancja na ograniczenie równościowe.
+        Solver CVXPY do użycia (domyślnie "CLARABEL").
+    tol : float | None
+        Tolerancja na ograniczenie. Jeśli None — auto-estymacja.
 
     Zwraca
     -------
     NDArray o kształcie (d,)
         Rozwiązanie x̂ — estymata wektora kierunkowego.
     """
-    d = Phi.shape[1]
+    m, d = Phi.shape
+    if tol is None:
+        # Heurystyka: tolerancja proporcjonalna do siły sygnału.
+        # Residuum Taylora ≈ O(ε · ||∇²f|| · d/m) → w praktyce ~5–10% ||y||.
+        tol = 0.05 * np.linalg.norm(y) + 1e-6
     z = cp.Variable(d)
     objective = cp.Minimize(cp.norm(z, 1))
     constraints = [cp.norm(Phi @ z - y, 2) <= tol]
@@ -49,11 +57,14 @@ def l1_minimize(
 
 
 def l1_minimize_noisy(
-    Phi: NDArray, y: NDArray, sigma: float, solver: str = "SCS"
+    Phi: NDArray, y: NDArray, sigma: float, solver: str = "CLARABEL"
 ) -> NDArray:
     """
-    Rozwiązuje problem Dantzig selector / LASSO dla danych zaszumionych:
-        x̂ = argmin ||z||_{l1}  subject to  ||Φz - y||_2 ≤ σ√m
+    Rozwiązuje problem BPDN dla danych zaszumionych:
+        x̂ = argmin ||z||_{l1}  subject to  ||Φz - y||_2 ≤ tol
+
+    Tolerancja łączy szum pomiarowy i residuum Taylora:
+        tol = σ·√m + 0.1·||y||₂
 
     Używany w przypadku pomiarów z szumem (sekcja 5.1 Vybirala).
 
@@ -64,7 +75,7 @@ def l1_minimize_noisy(
     y : NDArray o kształcie (m,)
         Zaszumiony wektor obserwacji.
     sigma : float
-        Poziom szumu (odchylenie standardowe).
+        Poziom szumu (efektywny, po podzieleniu przez ε).
     solver : str
         Solver CVXPY.
 
@@ -76,7 +87,9 @@ def l1_minimize_noisy(
     m, d = Phi.shape
     z = cp.Variable(d)
     objective = cp.Minimize(cp.norm(z, 1))
-    constraints = [cp.norm(Phi @ z - y, 2) <= sigma * np.sqrt(m)]
+    # Łączymy szum pomiarowy i residuum Taylora
+    tol = sigma * np.sqrt(m) + 0.05 * np.linalg.norm(y) + 1e-6
+    constraints = [cp.norm(Phi @ z - y, 2) <= tol]
     problem = cp.Problem(objective, constraints)
     problem.solve(solver=solver, verbose=False)
 

@@ -17,10 +17,9 @@ from .sampling import sample_sphere, bernoulli_matrix
 from .l1_solver import l1_minimize, l1_minimize_noisy
 
 
-def _build_finite_differences(f: callable,
-                               Xi: NDArray,
-                               Phi_rows: NDArray,
-                               epsilon: float) -> NDArray:
+def _build_finite_differences(
+    f: callable, Xi: NDArray, Phi_rows: NDArray, epsilon: float
+) -> NDArray:
     """
     Konstruuje macierz Y ilorazów różnicowych (finite differences).
 
@@ -56,14 +55,16 @@ def _build_finite_differences(f: callable,
     return Y
 
 
-def algorithm1(f: callable,
-               d: int,
-               m_Phi: int,
-               m_X: int,
-               epsilon: float = 0.1,
-               noise_sigma: float = 0.0,
-               rng: np.random.Generator | None = None,
-               verbose: bool = False) -> tuple[NDArray, callable]:
+def algorithm1(
+    f: callable,
+    d: int,
+    m_Phi: int,
+    m_X: int,
+    epsilon: float = 0.1,
+    noise_sigma: float = 0.0,
+    rng: np.random.Generator | None = None,
+    verbose: bool = False,
+) -> tuple[NDArray, callable]:
     """
     Algorytm 1 — aproksymacja funkcji grzbietowej f(x) = g(a · x)
     dla przypadku k = 1.
@@ -107,8 +108,8 @@ def algorithm1(f: callable,
         rng = np.random.default_rng()
 
     # (1) Losowanie zbiorów
-    Xi = sample_sphere(d, m_X, rng)                    # m_X × d
-    Phi = bernoulli_matrix(m_Phi, d, rng)               # m_Phi × d
+    Xi = sample_sphere(d, m_X, rng)  # m_X × d
+    Phi = bernoulli_matrix(m_Phi, d, rng)  # m_Phi × d
 
     # Kierunki φ_i z (16): wiersze Φ to już φ_i / √m_Phi,
     # ale w ilorazie różnicowym potrzebujemy φ_i ∈ B(√(d/m_Phi)).
@@ -129,9 +130,10 @@ def algorithm1(f: callable,
     for j in range(m_X):
         y_j = Y[:, j]
         if noise_sigma > 0:
-            # Dla danych zaszumionych: relaxed BP
-            tol = noise_sigma * np.sqrt(m_Phi) / epsilon
-            X_hat[:, j] = l1_minimize_noisy(Phi, y_j, sigma=tol)
+            # Tolerancja = szum pomiarowy (σ√m/ε) + residuum Taylora (~5% ||y||)
+            noise_tol = noise_sigma * np.sqrt(m_Phi) / epsilon
+            taylor_tol = 0.05 * np.linalg.norm(y_j)
+            X_hat[:, j] = l1_minimize(Phi, y_j, tol=noise_tol + taylor_tol + 1e-6)
         else:
             X_hat[:, j] = l1_minimize(Phi, y_j)
 
@@ -162,15 +164,17 @@ def algorithm1(f: callable,
     return a_hat, f_hat
 
 
-def algorithm2(f: callable,
-               d: int,
-               k: int,
-               m_Phi: int,
-               m_X: int,
-               epsilon: float = 0.1,
-               noise_sigma: float = 0.0,
-               rng: np.random.Generator | None = None,
-               verbose: bool = False) -> tuple[NDArray, callable]:
+def algorithm2(
+    f: callable,
+    d: int,
+    k: int,
+    m_Phi: int,
+    m_X: int,
+    epsilon: float = 0.1,
+    noise_sigma: float = 0.0,
+    rng: np.random.Generator | None = None,
+    verbose: bool = False,
+) -> tuple[NDArray, callable]:
     """
     Algorytm 2 — aproksymacja funkcji k-grzbietowej f(x) = g(Ax)
     dla przypadku k ≥ 1.
@@ -230,8 +234,9 @@ def algorithm2(f: callable,
     for j in range(m_X):
         y_j = Y[:, j]
         if noise_sigma > 0:
-            tol = noise_sigma * np.sqrt(m_Phi) / epsilon
-            X_hat[:, j] = l1_minimize_noisy(Phi, y_j, sigma=tol)
+            noise_tol = noise_sigma * np.sqrt(m_Phi) / epsilon
+            taylor_tol = 0.05 * np.linalg.norm(y_j)
+            X_hat[:, j] = l1_minimize(Phi, y_j, tol=noise_tol + taylor_tol + 1e-6)
         else:
             X_hat[:, j] = l1_minimize(Phi, y_j)
 
@@ -245,8 +250,10 @@ def algorithm2(f: callable,
     if verbose:
         print(f"  Wartości osobliwe X̂^T: {S[:min(k+2, len(S))]}")
         if k < len(S):
-            print(f"  Przerwa spektralna: σ_{k} = {S[k-1]:.6f}, "
-                  f"σ_{k+1} = {S[k] if k < len(S) else 0:.6f}")
+            print(
+                f"  Przerwa spektralna: σ_{k} = {S[k-1]:.6f}, "
+                f"σ_{k+1} = {S[k] if k < len(S) else 0:.6f}"
+            )
 
     # k prawych wektorów osobliwych (wiersze V^T)
     A_hat = Vt[:k, :]  # kształt (k, d)
@@ -258,15 +265,17 @@ def algorithm2(f: callable,
     return A_hat, f_hat
 
 
-def identify_active_coordinates(f: callable,
-                                 d: int,
-                                 k: int,
-                                 m_Phi: int,
-                                 m_X: int,
-                                 epsilon: float = 0.1,
-                                 noise_sigma: float = 0.0,
-                                 threshold: float = 0.1,
-                                 rng: np.random.Generator | None = None) -> list[int]:
+def identify_active_coordinates(
+    f: callable,
+    d: int,
+    k: int,
+    m_Phi: int,
+    m_X: int,
+    epsilon: float = 0.1,
+    noise_sigma: float = 0.0,
+    threshold: float = 0.1,
+    rng: np.random.Generator | None = None,
+) -> list[int]:
     """
     Identyfikacja aktywnych współrzędnych funkcji f na podstawie
     odzyskanej macierzy Â.

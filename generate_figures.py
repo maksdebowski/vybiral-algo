@@ -1,8 +1,8 @@
 """
 Skrypt generujący wykresy do pracy magisterskiej.
 
-Generuje 7 figur w katalogu figures/ w formacie PDF (grafika wektorowa)
-gotowych do zamieszczenia w LaTeX-u.
+Generuje 7 figur w katalogu figures/ w formacie JPG
+gotowych do zamieszczenia w pracy magisterskiej.
 
 Użycie:
     python generate_figures.py           # wszystkie wykresy
@@ -122,9 +122,11 @@ def figure1():
     ax.set_yscale("log")
     ax.legend()
     fig.tight_layout()
-    fig.savefig(f"{FIGDIR}/fig1_alg1_convergence.pdf", bbox_inches="tight")
+    fig.savefig(
+        f"{FIGDIR}/fig1_alg1_convergence.jpg", format="jpeg", bbox_inches="tight"
+    )
     plt.close(fig)
-    print("  → Zapisano fig1_alg1_convergence.pdf\n")
+    print("  → Zapisano fig1_alg1_convergence.jpg\n")
 
 
 # ===================================================================
@@ -190,10 +192,10 @@ def figure2():
     ax2.set_xlim(-0.5, d - 0.5)
 
     fig.tight_layout()
-    fig.savefig(f"{FIGDIR}/fig2_alg1_vector.pdf", bbox_inches="tight")
+    fig.savefig(f"{FIGDIR}/fig2_alg1_vector.jpg", format="jpeg", bbox_inches="tight")
     plt.close(fig)
     print(f"  Błąd: {np.linalg.norm(a_hat - a_true):.6f}")
-    print("  → Zapisano fig2_alg1_vector.pdf\n")
+    print("  → Zapisano fig2_alg1_vector.jpg\n")
 
 
 # ===================================================================
@@ -259,9 +261,11 @@ def figure3():
     ax.set_yscale("log")
     ax.legend()
     fig.tight_layout()
-    fig.savefig(f"{FIGDIR}/fig3_alg2_convergence.pdf", bbox_inches="tight")
+    fig.savefig(
+        f"{FIGDIR}/fig3_alg2_convergence.jpg", format="jpeg", bbox_inches="tight"
+    )
     plt.close(fig)
-    print("  → Zapisano fig3_alg2_convergence.pdf\n")
+    print("  → Zapisano fig3_alg2_convergence.jpg\n")
 
 
 # ===================================================================
@@ -341,10 +345,12 @@ def figure4():
     )
 
     fig.tight_layout()
-    fig.savefig(f"{FIGDIR}/fig4_alg2_singular_values.pdf", bbox_inches="tight")
+    fig.savefig(
+        f"{FIGDIR}/fig4_alg2_singular_values.jpg", format="jpeg", bbox_inches="tight"
+    )
     plt.close(fig)
     print(f"  Wartości osobliwe (top-{n_show}): {np.round(S[:n_show], 4)}")
-    print("  → Zapisano fig4_alg2_singular_values.pdf\n")
+    print("  → Zapisano fig4_alg2_singular_values.jpg\n")
 
 
 # ===================================================================
@@ -440,9 +446,11 @@ def figure5():
     ax.legend()
 
     fig.tight_layout()
-    fig.savefig(f"{FIGDIR}/fig5_epsilon_sensitivity.pdf", bbox_inches="tight")
+    fig.savefig(
+        f"{FIGDIR}/fig5_epsilon_sensitivity.jpg", format="jpeg", bbox_inches="tight"
+    )
     plt.close(fig)
-    print("  → Zapisano fig5_epsilon_sensitivity.pdf\n")
+    print("  → Zapisano fig5_epsilon_sensitivity.jpg\n")
 
 
 # ===================================================================
@@ -524,9 +532,9 @@ def figure6():
     ax.legend()
 
     fig.tight_layout()
-    fig.savefig(f"{FIGDIR}/fig6_alg1_noise.pdf", bbox_inches="tight")
+    fig.savefig(f"{FIGDIR}/fig6_alg1_noise.jpg", format="jpeg", bbox_inches="tight")
     plt.close(fig)
-    print("  → Zapisano fig6_alg1_noise.pdf\n")
+    print("  → Zapisano fig6_alg1_noise.jpg\n")
 
 
 # ===================================================================
@@ -651,9 +659,11 @@ def figure7():
         y=1.02,
     )
     fig.tight_layout()
-    fig.savefig(f"{FIGDIR}/fig7_dimension_scaling.pdf", bbox_inches="tight")
+    fig.savefig(
+        f"{FIGDIR}/fig7_dimension_scaling.jpg", format="jpeg", bbox_inches="tight"
+    )
     plt.close(fig)
-    print("  → Zapisano fig7_dimension_scaling.pdf\n")
+    print("  → Zapisano fig7_dimension_scaling.jpg\n")
 
 
 # ===================================================================

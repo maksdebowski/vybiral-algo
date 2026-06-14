@@ -1,6 +1,0 @@
-\subsection{Próbkowanie skompresowane (Compressed Sensing)}
-
-
-Zasadniczym wyzwaniem aproksymacji takich funkcji jest odtworzenie $A$ na podstawie niewielkiej liczby zapytań i próbek. Ponieważ gradienty funkcji w tym modelu wykazują naturalną rzadkość (leżą w niskowymiarowej podprzestrzeni), wykorzystamy teorię próbkowania skompresowanego, która umożliwia stabilne odzyskiwanie tego typu sygnałów z niekompletnych danych.
-
-Aby ta optymalizacja zadziałała, wykorzystywane przez nas macierze pomiarowe (oznaczmy je jako $\Phi$) muszą spełniać Własność Ograniczonej Izometrii (RIP). Oznacza to, że dla pewnej stałej $0<\delta<1$ oraz dla wszystkich wektorów $x \in \mathbb{R}^d$ o zadanej rzadkości zachodzi relacja $(1-\delta)\|x\|_{l_2^d}^2 \le \|\Phi x\|_{l_2^m}^2 \le (1+\delta)\|x\|_{l_2^d}^2$. Gwarantuje to, że błąd odzyskiwania wektora poprzez minimalizację normy $l_1$  zostanie ograniczony przez błąd jego najlepszej $K$-członowej aproksymacji. Błąd ten definiujemy jako $\sigma_K(x)_{l_1^d} := \inf \{ \|x - z\|_{l_1^d} : \#\text{supp}(z) \le K \}$.
