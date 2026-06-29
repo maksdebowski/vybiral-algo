@@ -87,7 +87,7 @@ def make_sparse_ridge_function(d: int, active_indices: list[int],
     gdzie niezerowe współrzędne to active_indices.
 
     g(t) = cos(π·t) — prosta nieliniowa funkcja spełniająca
-    warunki gładkości z modelu (C2, |g'(0)| ≠ 0).
+    warunki gładkości z modelu (C2, wartości oraz pochodne ograniczone).
 
     Parametry
     ----------
@@ -129,7 +129,8 @@ def make_k_ridge_function(d: int, k: int,
     """
     Tworzy funkcję k-grzbietową f(x) = g(Ax) z rzadką macierzą A.
 
-    g(y) = ||y||^2 — prosta funkcja radialna spełniająca warunki modelu.
+    g(y) = ||y||^2 — prosta funkcja radialna spełniająca warunki modelu
+    (C2, wartości oraz pochodne ograniczone).
 
     Parametry
     ----------

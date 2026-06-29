@@ -56,17 +56,17 @@ COLORS = {
     "Vybiral (CS+l1)": "#2176AE",
     "OMP (s=s*)": "#E04F5F",
     "OMP (s=10)": "#C0392B",
-    "ASM": "#57B894",
+    "ASM-FD": "#57B894",
     "SIR": "#F0A500",
 }
 MARKERS = {
     "Vybiral (CS+l1)": "o",
     "OMP (s=s*)": "s",
     "OMP (s=10)": "v",
-    "ASM": "^",
+    "ASM-FD": "^",
     "SIR": "D",
 }
-METHOD_ORDER = ["Vybiral (CS+l1)", "OMP (s=s*)", "OMP (s=10)", "ASM"]
+METHOD_ORDER = ["Vybiral (CS+l1)", "OMP (s=s*)", "OMP (s=10)", "ASM-FD"]
 FIGDIR = "figures"
 
 
@@ -172,12 +172,12 @@ def figure_c1():
         print(f"  [{label}] m_Phi={m_Phi}: {means[-1]:.4f}")
     results[label] = (means, stds)
 
-    # --- ASM (uses 2d evals per sample, so m_samples = m_Phi*m_X/(2d) for budget) ---
-    # For fair comparison, ASM gets same total func eval budget = m_Phi * m_X
-    label = "ASM"
+    # --- ASM-FD (centralne różnice skończone, 2d ewaluacji na punkt) ---
+    # Dla uczciwego porównania: budżet ASM-FD = m_X*(m_Phi+1) (budżet Vybirala)
+    label = "ASM-FD"
     means, stds = [], []
     for m_Phi in m_Phi_values:
-        total_budget = m_Phi * m_X
+        total_budget = m_X * (m_Phi + 1)
         m_asm = max(2, total_budget // (2 * d))
         errors = []
         for trial in range(n_trials):
@@ -207,7 +207,7 @@ def figure_c1():
             color=COLORS[label],
             label=label,
         )
-    ax.set_xlabel(r"$m_\Phi$ (Vybiral/OMP) / proporcjonalny budżet (ASM)")
+    ax.set_xlabel(r"$m_\Phi$ (Vybiral/OMP) / proporcjonalny budżet (ASM-FD)")
     ax.set_ylabel(r"$\min_{\pm}\|a - (\pm\hat{a})\|_2$")
     ax.set_title(r"Porównanie metod: rekonstrukcja $a$ ($d=100$, $k=1$, $s=3$)")
     ax.set_yscale("log")
@@ -242,12 +242,12 @@ def figure_c2():
 
     results = {}
 
-    # --- Vybiral: budget = m_Phi * m_X, set m_X=25, vary m_Phi ---
+    # --- Vybiral: budget = m_X*(m_Phi+1), set m_X=25, vary m_Phi ---
     label = "Vybiral (CS+l1)"
     m_X_v = 25
     means, stds = [], []
     for budget in budgets:
-        m_Phi = budget // m_X_v
+        m_Phi = budget // m_X_v - 1
         if m_Phi < 5 or m_Phi >= d:
             means.append(np.nan)
             stds.append(np.nan)
@@ -269,7 +269,7 @@ def figure_c2():
     label = "OMP (s=s*)"
     means, stds = [], []
     for budget in budgets:
-        m_Phi = budget // m_X_v
+        m_Phi = budget // m_X_v - 1
         if m_Phi < 5 or m_Phi >= d:
             means.append(np.nan)
             stds.append(np.nan)
@@ -293,7 +293,7 @@ def figure_c2():
     label = "OMP (s=10)"
     means, stds = [], []
     for budget in budgets:
-        m_Phi = budget // m_X_v
+        m_Phi = budget // m_X_v - 1
         if m_Phi < 5 or m_Phi >= d:
             means.append(np.nan)
             stds.append(np.nan)
@@ -311,8 +311,8 @@ def figure_c2():
         print(f"  [{label}] budget={budget} (m_Phi={m_Phi}): {means[-1]:.4f}")
     results[label] = (means, stds)
 
-    # --- ASM: budget = 2d * m_samples ---
-    label = "ASM"
+    # --- ASM-FD: budget = 2d * m_samples ---
+    label = "ASM-FD"
     means, stds = [], []
     for budget in budgets:
         m_asm = max(2, budget // (2 * d))
@@ -363,7 +363,7 @@ def figure_c3():
 
     d = 80
     k = 2
-    sparsity = 6  # k * |active_indices_per_row|
+    sparsity = 4  # rozmiar wspólnego nośnika macierzy A (|active_indices|)
     m_X = 35
     epsilon = 0.1
     n_trials = 6
@@ -397,7 +397,7 @@ def figure_c3():
         print(f"  [{label}] m_Phi={m_Phi}: {means[-1]:.4f}")
     results[label] = (means, stds)
 
-    # --- OMP (oracle s=6) ---
+    # --- OMP (oracle s=4) ---
     label = "OMP (s=s*)"
     means, stds = [], []
     for m_Phi in m_Phi_values:
@@ -433,11 +433,11 @@ def figure_c3():
         print(f"  [{label}] m_Phi={m_Phi}: {means[-1]:.4f}")
     results[label] = (means, stds)
 
-    # --- ASM ---
-    label = "ASM"
+    # --- ASM-FD ---
+    label = "ASM-FD"
     means, stds = [], []
     for m_Phi in m_Phi_values:
-        total_budget = m_Phi * m_X
+        total_budget = m_X * (m_Phi + 1)
         m_asm = max(3, total_budget // (2 * d))
         errors = []
         for trial in range(n_trials):
@@ -559,10 +559,10 @@ def figure_c4():
         print(f"  [{label}] sigma={sigma}: {means[-1]:.4f}")
     results[label] = (means, stds)
 
-    # --- ASM ---
-    label = "ASM"
+    # --- ASM-FD ---
+    label = "ASM-FD"
     means, stds = [], []
-    total_budget = m_Phi * m_X
+    total_budget = m_X * (m_Phi + 1)
     m_asm = max(3, total_budget // (2 * d))
     for sigma in noise_sigmas:
         errors = []
@@ -684,11 +684,11 @@ def figure_c5():
         print(f"  [{label}] m_Phi={m_Phi}: {times_list[-1]:.2f}s")
     results[label] = times_list
 
-    # --- ASM ---
-    label = "ASM"
+    # --- ASM-FD ---
+    label = "ASM-FD"
     times_list = []
     for m_Phi in m_Phi_values:
-        total_budget = m_Phi * m_X
+        total_budget = m_X * (m_Phi + 1)
         m_asm = max(3, total_budget // (2 * d))
         trial_times = []
         for trial in range(n_trials):
@@ -828,10 +828,10 @@ def figure_c6():
         print(f"  [{label}] d={d}: {means[-1]:.4f}")
     results[label] = (means, stds)
 
-    # --- ASM ---
-    label = "ASM"
+    # --- ASM-FD ---
+    label = "ASM-FD"
     means, stds = [], []
-    total_budget = m_Phi * m_X
+    total_budget = m_X * (m_Phi + 1)
     for d in d_values:
         m_asm = max(3, total_budget // (2 * d))
         rng_s = np.random.default_rng(seed)

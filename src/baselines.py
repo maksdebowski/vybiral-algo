@@ -1,6 +1,6 @@
 """
 Implementacja algorytmów bazowych (baselines) do porównania
-z metodą Fornasiera–Schnassa–Vybirala (compressed sensing).
+z metodą Fornasiera-Schnassa-Vybirala (compressed sensing).
 
 Zaimplementowane metody:
 1. Active Subspace Method (ASM) — Constantine (2015)
@@ -49,7 +49,7 @@ def active_subspace_method(f: callable,
     Dekompozycja spektralna C daje k dominujących wektorów własnych
     jako estymatory aktywnych kierunków.
 
-    Koszt: 2d × m_samples ewaluacji funkcji (centralne różnice skończone
+    Koszt: 2d x m_samples ewaluacji funkcji (centralne różnice skończone
     do estymacji pełnego gradientu w R^d).
 
     Parametry
@@ -360,7 +360,7 @@ def sliced_inverse_regression(f: callable,
     sorted_idx = np.argsort(Y)
     slice_size = max(1, m_samples // n_slices)
 
-    # (4–5) Ważona kowariancja plasterków
+    # (4-5) Ważona kowariancja plasterków
     Sigma_SIR = np.zeros((d, d))
     x_bar = np.mean(X, axis=0)
 
