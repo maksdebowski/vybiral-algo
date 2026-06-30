@@ -16,18 +16,21 @@ import time
 import numpy as np
 import matplotlib
 
-matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 from matplotlib.ticker import MaxNLocator
 
 from src.algorithms import algorithm1, algorithm2
 from src.sampling import sample_sphere, bernoulli_matrix
 from src.l1_solver import l1_minimize
-from src.test_functions import make_sparse_ridge_function, make_k_ridge_function
+from src.test_functions import (
+    make_sparse_ridge_function,
+    make_k_ridge_function,
+)
 
 # ---------------------------------------------------------------------------
 # Styl wykresów — profesjonalny, czytelny, kompatybilny z LaTeX
 # ---------------------------------------------------------------------------
+matplotlib.use("Agg")
 plt.rcParams.update(
     {
         "figure.dpi": 150,
@@ -97,14 +100,19 @@ def figure1():
                         func, d, m_Phi, m_X, epsilon=0.1, rng=rng_trial
                     )
                     err = min(
-                        np.linalg.norm(a_hat - a_true), np.linalg.norm(a_hat + a_true)
+                        np.linalg.norm(a_hat - a_true),
+                        np.linalg.norm(a_hat + a_true),
                     )
                     errors.append(err)
                 except RuntimeError:
                     errors.append(2.0)
             mean_errors.append(np.mean(errors))
             std_errors.append(np.std(errors))
-            print(f"  d={d}, m_Φ={m_Phi}: {np.mean(errors):.4f} ± {np.std(errors):.4f}")
+            print(
+                f"  d={d}, m_Φ={m_Phi}: {np.mean(errors):.4f}"
+                + "+/-"
+                + f"{np.std(errors):.4f}"
+            )
 
         valid = [i for i, v in enumerate(mean_errors) if not np.isnan(v)]
         ax.errorbar(
@@ -118,12 +126,16 @@ def figure1():
 
     ax.set_xlabel(r"$m_\Phi$ (liczba kierunków pomiarowych)")
     ax.set_ylabel(r"$\min_{\pm}\|a - (\pm\hat{a})\|_2$")
-    ax.set_title(r"Algorytm 1: błąd rekonstrukcji wektora $a$ ($k=1$, $m_X=30$)")
+    ax.set_title(
+        r"Algorytm 1: błąd rekonstrukcji wektora $a$ ($k=1$, $m_X=30$)"
+    )
     ax.set_yscale("log")
     ax.legend()
     fig.tight_layout()
     fig.savefig(
-        f"{FIGDIR}/fig1_alg1_convergence.jpg", format="jpeg", bbox_inches="tight"
+        f"{FIGDIR}/fig1_alg1_convergence.jpg",
+        format="jpeg",
+        bbox_inches="tight",
     )
     plt.close(fig)
     print("  → Zapisano fig1_alg1_convergence.jpg\n")
@@ -178,7 +190,8 @@ def figure2():
     )
     ax1.set_ylabel("Wartość współrzędnej")
     ax1.set_title(
-        r"Algorytm 1: porównanie $a$ i $\hat{a}$ ($d=100$, $m_\Phi=50$, $m_X=25$)"
+        r"Algorytm 1: porównanie $a$ i $\hat{a}$ ($d=100$,"
+        + r" $m_\Phi=50$, $m_X=25$)"
     )
     ax1.legend()
     ax1.axhline(0, color="gray", linewidth=0.5)
@@ -192,7 +205,9 @@ def figure2():
     ax2.set_xlim(-0.5, d - 0.5)
 
     fig.tight_layout()
-    fig.savefig(f"{FIGDIR}/fig2_alg1_vector.jpg", format="jpeg", bbox_inches="tight")
+    fig.savefig(
+        f"{FIGDIR}/fig2_alg1_vector.jpg", format="jpeg", bbox_inches="tight"
+    )
     plt.close(fig)
     print(f"  Błąd: {np.linalg.norm(a_hat - a_true):.6f}")
     print("  → Zapisano fig2_alg1_vector.jpg\n")
@@ -242,7 +257,11 @@ def figure3():
                     errors.append(2.0)
             mean_errors.append(np.mean(errors))
             std_errors.append(np.std(errors))
-            print(f"  k={k}, m_Φ={m_Phi}: {np.mean(errors):.4f} ± {np.std(errors):.4f}")
+            print(
+                f"  k={k}, m_Φ={m_Phi}: {np.mean(errors):.4f}"
+                + " +/- "
+                + f"{np.std(errors):.4f}"
+            )
 
         ax.errorbar(
             m_Phi_values,
@@ -256,13 +275,16 @@ def figure3():
     ax.set_xlabel(r"$m_\Phi$ (liczba kierunków pomiarowych)")
     ax.set_ylabel(r"$\|A^T A - \hat{A}^T \hat{A}\|_F$")
     ax.set_title(
-        rf"Algorytm 2: błąd rekonstrukcji podprzestrzeni ($d={d}$, $m_X={m_X}$)"
+        "Algorytm 2: błąd rekonstrukcji podprzestrzeni"
+        + rf" ($d={d}$, $m_X={m_X}$)"
     )
     ax.set_yscale("log")
     ax.legend()
     fig.tight_layout()
     fig.savefig(
-        f"{FIGDIR}/fig3_alg2_convergence.jpg", format="jpeg", bbox_inches="tight"
+        f"{FIGDIR}/fig3_alg2_convergence.jpg",
+        format="jpeg",
+        bbox_inches="tight",
     )
     plt.close(fig)
     print("  → Zapisano fig3_alg2_convergence.jpg\n")
@@ -307,7 +329,9 @@ def figure4():
     n_show = min(15, len(S))
 
     fig, ax = plt.subplots(figsize=(7, 4.5))
-    bars = ax.bar(np.arange(1, n_show + 1), S[:n_show], color=COLORS[0], alpha=0.8)
+    bars = ax.bar(
+        np.arange(1, n_show + 1), S[:n_show], color=COLORS[0], alpha=0.8
+    )
     # Podświetl k pierwszych
     for i in range(min(k, n_show)):
         bars[i].set_color(COLORS[1])
@@ -316,9 +340,12 @@ def figure4():
     # Linia przerwy spektralnej
     if k < n_show:
         gap_x = k + 0.5
-        ax.axvline(gap_x, color="red", linestyle="--", linewidth=1.2, alpha=0.7)
+        ax.axvline(
+            gap_x, color="red", linestyle="--", linewidth=1.2, alpha=0.7
+        )
         ax.annotate(
-            rf"przerwa: $\sigma_{k}={S[k-1]:.3f}$, $\sigma_{{{k+1}}}={S[k]:.3f}$",
+            rf"przerwa: $\sigma_{k}={S[k-1]:.3f}$,"
+            + rf" $\sigma_{{{k+1}}}={S[k]:.3f}$",
             xy=(gap_x, S[k - 1] * 0.7),
             fontsize=9,
             color="red",
@@ -328,7 +355,8 @@ def figure4():
     ax.set_xlabel("Indeks wartości osobliwej")
     ax.set_ylabel(r"$\sigma_i$")
     ax.set_title(
-        rf"Wartości osobliwe $\hat{{X}}^T$ — przerwa spektralna ($d={d}$, $k={k}$, $m_\Phi={m_Phi}$)"
+        r"Wartości osobliwe $\hat{{X}}^T$ — przerwa spektralna"
+        + rf" ($d={d}$, $k={k}$, $m_\Phi={m_Phi}$)"
     )
     ax.xaxis.set_major_locator(MaxNLocator(integer=True))
 
@@ -338,7 +366,9 @@ def figure4():
     ax.legend(
         handles=[
             Patch(
-                facecolor=COLORS[1], alpha=0.9, label=rf"$k={k}$ pierwszych (aktywne)"
+                facecolor=COLORS[1],
+                alpha=0.9,
+                label=rf"$k={k}$ pierwszych (aktywne)",
             ),
             Patch(facecolor=COLORS[0], alpha=0.8, label="pozostałe"),
         ]
@@ -346,7 +376,9 @@ def figure4():
 
     fig.tight_layout()
     fig.savefig(
-        f"{FIGDIR}/fig4_alg2_singular_values.jpg", format="jpeg", bbox_inches="tight"
+        f"{FIGDIR}/fig4_alg2_singular_values.jpg",
+        format="jpeg",
+        bbox_inches="tight",
     )
     plt.close(fig)
     print(f"  Wartości osobliwe (top-{n_show}): {np.round(S[:n_show], 4)}")
@@ -385,7 +417,8 @@ def figure5():
             try:
                 a_hat, _ = algorithm1(func, d, m_Phi, m_X, eps, rng=rng_trial)
                 err = min(
-                    np.linalg.norm(a_hat - a_true), np.linalg.norm(a_hat + a_true)
+                    np.linalg.norm(a_hat - a_true),
+                    np.linalg.norm(a_hat + a_true),
                 )
                 errors.append(err)
             except RuntimeError:
@@ -393,7 +426,8 @@ def figure5():
         mean_noiseless.append(np.mean(errors))
         std_noiseless.append(np.std(errors))
         print(
-            f"  [bez szumu] ε={eps:.4f}: {np.mean(errors):.4f} ± {np.std(errors):.4f}"
+            f"  [bez szumu] ε={eps:.4f}: {np.mean(errors):.4f}"
+            + f" ± {np.std(errors):.4f}"
         )
 
     # --- Krzywa 2: z szumem σ=0.01 ---
@@ -405,10 +439,17 @@ def figure5():
             rng_trial = np.random.default_rng(seed + trial + 77777)
             try:
                 a_hat, _ = algorithm1(
-                    func, d, m_Phi, m_X, eps, noise_sigma=noise_sigma, rng=rng_trial
+                    func,
+                    d,
+                    m_Phi,
+                    m_X,
+                    eps,
+                    noise_sigma=noise_sigma,
+                    rng=rng_trial,
                 )
                 err = min(
-                    np.linalg.norm(a_hat - a_true), np.linalg.norm(a_hat + a_true)
+                    np.linalg.norm(a_hat - a_true),
+                    np.linalg.norm(a_hat + a_true),
                 )
                 errors.append(err)
             except RuntimeError:
@@ -416,7 +457,8 @@ def figure5():
         mean_noisy.append(np.mean(errors))
         std_noisy.append(np.std(errors))
         print(
-            f"  [σ={noise_sigma}] ε={eps:.4f}: {np.mean(errors):.4f} ± {np.std(errors):.4f}"
+            f"[\\sigma={noise_sigma}] \\epsilon={eps:.4f}:"
+            + f" {np.mean(errors):.4f} +/- {np.std(errors):.4f}"
         )
 
     fig, ax = plt.subplots()
@@ -441,13 +483,16 @@ def figure5():
     ax.set_xlabel(r"$\varepsilon$ (krok różnicy skończonej)")
     ax.set_ylabel(r"$\min_{\pm}\|a - (\pm\hat{a})\|_2$")
     ax.set_title(
-        rf"Wpływ parametru $\varepsilon$ na jakość rekonstrukcji ($d={d}$, $m_\Phi={m_Phi}$)"
+        r"Wpływ parametru $\varepsilon$ na jakość rekonstrukcji"
+        + rf" ($d={d}$, $m_\Phi={m_Phi}$)"
     )
     ax.legend()
 
     fig.tight_layout()
     fig.savefig(
-        f"{FIGDIR}/fig5_epsilon_sensitivity.jpg", format="jpeg", bbox_inches="tight"
+        f"{FIGDIR}/fig5_epsilon_sensitivity.jpg",
+        format="jpeg",
+        bbox_inches="tight",
     )
     plt.close(fig)
     print("  → Zapisano fig5_epsilon_sensitivity.jpg\n")
@@ -498,7 +543,8 @@ def figure6():
                         rng=rng_trial,
                     )
                     err = min(
-                        np.linalg.norm(a_hat - a_true), np.linalg.norm(a_hat + a_true)
+                        np.linalg.norm(a_hat - a_true),
+                        np.linalg.norm(a_hat + a_true),
                     )
                     errors.append(err)
                 except RuntimeError:
@@ -506,7 +552,8 @@ def figure6():
             mean_errors.append(np.mean(errors))
             std_errors.append(np.std(errors))
             print(
-                f"  [ε={eps}] σ={sigma:.4f}: {np.mean(errors):.4f} ± {np.std(errors):.4f}"
+                rf"\epsilon={eps}] \sigma={sigma:.4f}:"
+                + rf" {np.mean(errors):.4f} ± {np.std(errors):.4f}"
             )
 
         x_labels = [str(s) if s > 0 else "0" for s in noise_sigmas]
@@ -527,12 +574,15 @@ def figure6():
     ax.set_xlabel(r"$\sigma$ (odchylenie standardowe szumu)")
     ax.set_ylabel(r"$\min_{\pm}\|a - (\pm\hat{a})\|_2$")
     ax.set_title(
-        rf"Algorytm 1: odporność na szum Gaussowski ($d={d}$, $m_\Phi={m_Phi}$)"
+        "Algorytm 1: odporność na szum Gaussowski"
+        + rf" ($d={d}$, $m_\Phi={m_Phi}$)"
     )
     ax.legend()
 
     fig.tight_layout()
-    fig.savefig(f"{FIGDIR}/fig6_alg1_noise.jpg", format="jpeg", bbox_inches="tight")
+    fig.savefig(
+        f"{FIGDIR}/fig6_alg1_noise.jpg", format="jpeg", bbox_inches="tight"
+    )
     plt.close(fig)
     print("  → Zapisano fig6_alg1_noise.jpg\n")
 
@@ -576,7 +626,8 @@ def figure7():
                     func, d, m_Phi_fixed, m_X, epsilon=0.1, rng=rng_trial
                 )
                 err = min(
-                    np.linalg.norm(a_hat - a_true), np.linalg.norm(a_hat + a_true)
+                    np.linalg.norm(a_hat - a_true),
+                    np.linalg.norm(a_hat + a_true),
                 )
                 errors.append(err)
             except RuntimeError:
@@ -619,9 +670,12 @@ def figure7():
         for trial in range(n_trials):
             rng_trial = np.random.default_rng(seed + trial + d * 10000)
             try:
-                a_hat, _ = algorithm1(func, d, m_Phi, m_X, epsilon=0.1, rng=rng_trial)
+                a_hat, _ = algorithm1(
+                    func, d, m_Phi, m_X, epsilon=0.1, rng=rng_trial
+                )
                 err = min(
-                    np.linalg.norm(a_hat - a_true), np.linalg.norm(a_hat + a_true)
+                    np.linalg.norm(a_hat - a_true),
+                    np.linalg.norm(a_hat + a_true),
                 )
                 errors.append(err)
             except RuntimeError:
@@ -660,7 +714,9 @@ def figure7():
     )
     fig.tight_layout()
     fig.savefig(
-        f"{FIGDIR}/fig7_dimension_scaling.jpg", format="jpeg", bbox_inches="tight"
+        f"{FIGDIR}/fig7_dimension_scaling.jpg",
+        format="jpeg",
+        bbox_inches="tight",
     )
     plt.close(fig)
     print("  → Zapisano fig7_dimension_scaling.jpg\n")
@@ -700,7 +756,8 @@ def main():
     for fig_num in figs_to_run:
         if fig_num not in FIGURES:
             print(
-                f"UWAGA: Figura {fig_num} nie istnieje (dostępne: {sorted(FIGURES.keys())})"
+                f"UWAGA: Figura {fig_num} nie istnieje"
+                + f"(dostępne: {sorted(FIGURES.keys())})"
             )
             continue
         t0 = time.time()

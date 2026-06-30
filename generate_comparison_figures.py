@@ -1,7 +1,7 @@
 """
 Skrypt generujący wykresy porównawcze algorytmów do pracy magisterskiej.
 
-Porównuje metodę Fornasiera–Schnassa–Vybirala (CS + l1) z:
+Porównuje metodę Fornasiera-Schnassa-Vybirala (CS + l1) z:
 1. Active Subspace Method (ASM) — Constantine, 2015
 2. OMP-based Recovery (oracle s=s*) — Tropp & Gilbert, 2007
 3. OMP-based Recovery (overestimated s=10)
@@ -19,7 +19,6 @@ import time
 import numpy as np
 import matplotlib
 
-matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
 from src.algorithms import algorithm1, algorithm2
@@ -28,11 +27,15 @@ from src.baselines import (
     omp_algorithm1,
     omp_algorithm2,
 )
-from src.test_functions import make_sparse_ridge_function, make_k_ridge_function
+from src.test_functions import (
+    make_sparse_ridge_function,
+    make_k_ridge_function,
+)
 
 # ---------------------------------------------------------------------------
 # Styl
 # ---------------------------------------------------------------------------
+matplotlib.use("Agg")
 plt.rcParams.update(
     {
         "figure.dpi": 150,
@@ -163,7 +166,9 @@ def figure_c1():
         for trial in range(n_trials):
             rng_t = np.random.default_rng(seed + trial + m_Phi * 1000)
             try:
-                a_hat = omp_algorithm1(func, d, m_Phi, m_X, 10, epsilon, rng=rng_t)
+                a_hat = omp_algorithm1(
+                    func, d, m_Phi, m_X, 10, epsilon, rng=rng_t
+                )
                 errors.append(_direction_error(a_true, a_hat))
             except Exception:
                 errors.append(2.0)
@@ -209,7 +214,9 @@ def figure_c1():
         )
     ax.set_xlabel(r"$m_\Phi$ (Vybiral/OMP) / proporcjonalny budżet (ASM-FD)")
     ax.set_ylabel(r"$\min_{\pm}\|a - (\pm\hat{a})\|_2$")
-    ax.set_title(r"Porównanie metod: rekonstrukcja $a$ ($d=100$, $k=1$, $s=3$)")
+    ax.set_title(
+        r"Porównanie metod: rekonstrukcja $a$ ($d=100$, $k=1$, $s=3$)"
+    )
     ax.set_yscale("log")
     ax.legend()
     fig.tight_layout()
@@ -256,7 +263,9 @@ def figure_c2():
         for trial in range(n_trials):
             rng_t = np.random.default_rng(seed + trial + budget * 100)
             try:
-                a_hat, _ = algorithm1(func, d, m_Phi, m_X_v, epsilon, rng=rng_t)
+                a_hat, _ = algorithm1(
+                    func, d, m_Phi, m_X_v, epsilon, rng=rng_t
+                )
                 errors.append(_direction_error(a_true, a_hat))
             except RuntimeError:
                 errors.append(2.0)
@@ -302,7 +311,9 @@ def figure_c2():
         for trial in range(n_trials):
             rng_t = np.random.default_rng(seed + trial + budget * 100)
             try:
-                a_hat = omp_algorithm1(func, d, m_Phi, m_X_v, 10, epsilon, rng=rng_t)
+                a_hat = omp_algorithm1(
+                    func, d, m_Phi, m_X_v, 10, epsilon, rng=rng_t
+                )
                 errors.append(_direction_error(a_true, a_hat))
             except Exception:
                 errors.append(2.0)
@@ -315,7 +326,14 @@ def figure_c2():
     label = "ASM-FD"
     means, stds = [], []
     for budget in budgets:
-        m_asm = max(2, budget // (2 * d))
+        m_asm = budget // (2 * d)
+        if m_asm < 2:
+            means.append(np.nan)
+            stds.append(np.nan)
+            print(
+                f"  [{label}] budget={budget}: pominięto (m_asm={m_asm} < 2)"
+            )
+            continue
         errors = []
         for trial in range(n_trials):
             rng_t = np.random.default_rng(seed + trial + budget * 100)
@@ -388,7 +406,9 @@ def figure_c3():
         for trial in range(n_trials):
             rng_t = np.random.default_rng(seed + trial + m_Phi * 1000)
             try:
-                A_hat, _ = algorithm2(func, d, k, m_Phi, m_X, epsilon, rng=rng_t)
+                A_hat, _ = algorithm2(
+                    func, d, k, m_Phi, m_X, epsilon, rng=rng_t
+                )
                 errors.append(_subspace_error(A_true, A_hat))
             except RuntimeError:
                 errors.append(2.0)
@@ -424,7 +444,9 @@ def figure_c3():
         for trial in range(n_trials):
             rng_t = np.random.default_rng(seed + trial + m_Phi * 1000)
             try:
-                A_hat = omp_algorithm2(func, d, k, m_Phi, m_X, 10, epsilon, rng=rng_t)
+                A_hat = omp_algorithm2(
+                    func, d, k, m_Phi, m_X, 10, epsilon, rng=rng_t
+                )
                 errors.append(_subspace_error(A_true, A_hat))
             except Exception:
                 errors.append(2.0)
@@ -530,7 +552,14 @@ def figure_c4():
             rng_t = np.random.default_rng(seed + trial + int(sigma * 1e6))
             try:
                 a_hat = omp_algorithm1(
-                    func, d, m_Phi, m_X, sparsity, epsilon, noise_sigma=sigma, rng=rng_t
+                    func,
+                    d,
+                    m_Phi,
+                    m_X,
+                    sparsity,
+                    epsilon,
+                    noise_sigma=sigma,
+                    rng=rng_t,
                 )
                 errors.append(_direction_error(a_true, a_hat))
             except Exception:
@@ -549,7 +578,14 @@ def figure_c4():
             rng_t = np.random.default_rng(seed + trial + int(sigma * 1e6))
             try:
                 a_hat = omp_algorithm1(
-                    func, d, m_Phi, m_X, 10, epsilon, noise_sigma=sigma, rng=rng_t
+                    func,
+                    d,
+                    m_Phi,
+                    m_X,
+                    10,
+                    epsilon,
+                    noise_sigma=sigma,
+                    rng=rng_t,
                 )
                 errors.append(_direction_error(a_true, a_hat))
             except Exception:
@@ -594,7 +630,12 @@ def figure_c4():
     for label in METHOD_ORDER:
         m, s = results[label]
         ax.errorbar(
-            x_pos, m, yerr=s, marker=MARKERS[label], color=COLORS[label], label=label
+            x_pos,
+            m,
+            yerr=s,
+            marker=MARKERS[label],
+            color=COLORS[label],
+            label=label,
         )
     ax.set_xticks(x_pos)
     ax.set_xticklabels(x_labels, rotation=30)
@@ -659,7 +700,9 @@ def figure_c5():
             rng_t = np.random.default_rng(seed + trial + m_Phi * 1000)
             t0 = time.time()
             try:
-                omp_algorithm1(func, d, m_Phi, m_X, sparsity, epsilon, rng=rng_t)
+                omp_algorithm1(
+                    func, d, m_Phi, m_X, sparsity, epsilon, rng=rng_t
+                )
             except Exception:
                 pass
             trial_times.append(time.time() - t0)
@@ -702,7 +745,9 @@ def figure_c5():
                 pass
             trial_times.append(time.time() - t0)
         times_list.append(np.mean(trial_times))
-        print(f"  [{label}] m_Phi={m_Phi} (m_asm={m_asm}): {times_list[-1]:.2f}s")
+        print(
+            f"  [{label}] m_Phi={m_Phi} (m_asm={m_asm}): {times_list[-1]:.2f}s"
+        )
     results[label] = times_list
 
     # --- Wykres ---
@@ -819,7 +864,9 @@ def figure_c6():
         for trial in range(n_trials):
             rng_t = np.random.default_rng(seed + trial + d * 10000)
             try:
-                a_hat = omp_algorithm1(func, d, m_Phi, m_X, 10, epsilon, rng=rng_t)
+                a_hat = omp_algorithm1(
+                    func, d, m_Phi, m_X, 10, epsilon, rng=rng_t
+                )
                 errors.append(_direction_error(a_true, a_hat))
             except Exception:
                 errors.append(2.0)
@@ -871,7 +918,9 @@ def figure_c6():
         )
     ax.set_xlabel(r"$d$ (wymiar przestrzeni)")
     ax.set_ylabel(r"$\min_{\pm}\|a - (\pm\hat{a})\|_2$")
-    ax.set_title(rf"Skalowanie z wymiarem $d$ ($m_\Phi={m_Phi}$, $k=1$, $s=3$)")
+    ax.set_title(
+        rf"Skalowanie z wymiarem $d$ ($m_\Phi={m_Phi}$, $k=1$, $s=3$)"
+    )
     ax.set_yscale("log")
     ax.legend()
     fig.tight_layout()
@@ -892,7 +941,9 @@ FIGURES = {
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Wykresy porownawcze algorytmow")
+    parser = argparse.ArgumentParser(
+        description="Wykresy porownawcze algorytmow"
+    )
     parser.add_argument(
         "--fig",
         nargs="*",
@@ -909,7 +960,8 @@ def main():
     for fig_num in figs_to_run:
         if fig_num not in FIGURES:
             print(
-                f"UWAGA: Figura {fig_num} nie istnieje (dostepne: {sorted(FIGURES.keys())})"
+                "UWAGA: Figura {fig_num} nie istnieje (dostepne:"
+                + f" {sorted(FIGURES.keys())})"
             )
             continue
         t0 = time.time()

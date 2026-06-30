@@ -22,6 +22,7 @@ class RidgeFunction:
     g : callable
         Funkcja jednej zmiennej g: R → R.
     """
+
     def __init__(self, a: NDArray, g: callable):
         self.a = a / np.linalg.norm(a)
         self.g = g
@@ -43,6 +44,7 @@ class KRidgeFunction:
     g : callable
         Funkcja g: R^k → R.
     """
+
     def __init__(self, A: NDArray, g: callable):
         self.A = A
         self.g = g
@@ -79,9 +81,12 @@ def vybiral_test_function(x: NDArray) -> float:
     return max(val, 0.0) ** 3
 
 
-def make_sparse_ridge_function(d: int, active_indices: list[int],
-                                active_values: NDArray | None = None,
-                                rng: np.random.Generator | None = None):
+def make_sparse_ridge_function(
+    d: int,
+    active_indices: list[int],
+    active_values: NDArray | None = None,
+    rng: np.random.Generator | None = None,
+):
     """
     Tworzy funkcję grzbietową f(x) = g(a · x) z rzadkim wektorem a,
     gdzie niezerowe współrzędne to active_indices.
@@ -123,9 +128,12 @@ def make_sparse_ridge_function(d: int, active_indices: list[int],
     return RidgeFunction(a, g), a
 
 
-def make_k_ridge_function(d: int, k: int,
-                           active_indices: list[int] | None = None,
-                           rng: np.random.Generator | None = None):
+def make_k_ridge_function(
+    d: int,
+    k: int,
+    active_indices: list[int] | None = None,
+    rng: np.random.Generator | None = None,
+):
     """
     Tworzy funkcję k-grzbietową f(x) = g(Ax) z rzadką macierzą A.
 
@@ -164,6 +172,6 @@ def make_k_ridge_function(d: int, k: int,
     A[:, active_indices] = Q[:, :k].T
 
     def g(y):
-        return np.sum(y ** 2)
+        return np.sum(y**2)
 
     return KRidgeFunction(A, g), A

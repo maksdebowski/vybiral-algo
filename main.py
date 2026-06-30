@@ -29,7 +29,10 @@ from src.experiments import (
     plot_success_maps,
 )
 from src.algorithms import algorithm1, algorithm2
-from src.test_functions import make_sparse_ridge_function, make_k_ridge_function
+from src.test_functions import (
+    make_sparse_ridge_function,
+    make_k_ridge_function,
+)
 
 
 def run_quick_test():
@@ -105,7 +108,8 @@ def run_experiment_alg1():
     )
     plot_reconstruction_error(
         results,
-        title=r"Algorytm 1: Błąd $\|a - \hat{a}\|_2$ vs. $m_\Phi$ ($d=100$, $k=1$)",
+        title=r"Algorytm 1: Błąd $\|a - \hat{a}\|_2$ vs."
+        + r" $m_\Phi$ ($d=100$, $k=1$)",
         save_path="figures/alg1_noiseless.png",
     )
     return results
@@ -127,7 +131,8 @@ def run_experiment_alg2():
     )
     plot_reconstruction_error(
         results,
-        title=r"Algorytm 2: $\|A^T A - \hat{A}^T \hat{A}\|_F$ vs. $m_\Phi$ ($d=50$, $k=2$)",
+        title=r"Algorytm 2: $\|A^T A - \hat{A}^T \hat{A}\|_F$ vs."
+        + r" $m_\Phi$ ($d=50$, $k=2$)",
         save_path="figures/alg2_noiseless.png",
     )
     return results
@@ -146,7 +151,9 @@ def run_experiment_epsilon():
         n_trials=10,
         seed=42,
     )
-    plot_epsilon_sensitivity(results, save_path="figures/epsilon_sensitivity.png")
+    plot_epsilon_sensitivity(
+        results, save_path="figures/epsilon_sensitivity.png"
+    )
     return results
 
 
@@ -181,7 +188,8 @@ def run_experiment_vybiral():
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Eksperymenty numeryczne — aproksymacja funkcji grzbietowych"
+        description="Eksperymenty numeryczne — aproksymacja funkcji"
+        + " grzbietowych"
     )
     parser.add_argument(
         "--experiment",

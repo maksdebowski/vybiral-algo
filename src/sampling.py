@@ -11,7 +11,9 @@ import numpy as np
 from numpy.typing import NDArray
 
 
-def sample_sphere(d: int, m: int, rng: np.random.Generator | None = None) -> NDArray:
+def sample_sphere(
+    d: int, m: int, rng: np.random.Generator | None = None
+) -> NDArray:
     """
     Losuje m punktów z jednostajnej miary powierzchniowej μ_{S^{d-1}}
     na sferze jednostkowej S^{d-1} w R^d.
@@ -39,7 +41,9 @@ def sample_sphere(d: int, m: int, rng: np.random.Generator | None = None) -> NDA
     return X / norms
 
 
-def bernoulli_matrix(m: int, d: int, rng: np.random.Generator | None = None) -> NDArray:
+def bernoulli_matrix(
+    m: int, d: int, rng: np.random.Generator | None = None
+) -> NDArray:
     """
     Generuje macierz pomiarową Φ o wymiarze m × d,
     składającą się z niezależnych zmiennych Bernoulliego

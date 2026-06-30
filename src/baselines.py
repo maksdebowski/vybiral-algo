@@ -18,8 +18,10 @@ from .sampling import sample_sphere, bernoulli_matrix
 # 1. Active Subspace Method (ASM) — Constantine, 2015
 # ===================================================================
 
-def _estimate_gradient_fd(f: callable, x: NDArray, d: int,
-                          epsilon: float) -> NDArray:
+
+def _estimate_gradient_fd(
+    f: callable, x: NDArray, d: int, epsilon: float
+) -> NDArray:
     """
     Estymacja gradientu ∇f(x) za pomocą centralnych różnic skończonych.
     Wymaga 2d ewaluacji funkcji.
@@ -28,18 +30,22 @@ def _estimate_gradient_fd(f: callable, x: NDArray, d: int,
     for i in range(d):
         e_i = np.zeros(d)
         e_i[i] = 1.0
-        grad[i] = (f(x + epsilon * e_i) - f(x - epsilon * e_i)) / (2.0 * epsilon)
+        grad[i] = (f(x + epsilon * e_i) - f(x - epsilon * e_i)) / (
+            2.0 * epsilon
+        )
     return grad
 
 
-def active_subspace_method(f: callable,
-                           d: int,
-                           k: int,
-                           m_samples: int,
-                           epsilon: float = 0.1,
-                           noise_sigma: float = 0.0,
-                           rng: np.random.Generator | None = None,
-                           verbose: bool = False) -> NDArray:
+def active_subspace_method(
+    f: callable,
+    d: int,
+    k: int,
+    m_samples: int,
+    epsilon: float = 0.1,
+    noise_sigma: float = 0.0,
+    rng: np.random.Generator | None = None,
+    verbose: bool = False,
+) -> NDArray:
     """
     Active Subspace Method (ASM) — Constantine, 2015.
 
@@ -101,8 +107,10 @@ def active_subspace_method(f: callable,
     eigenvectors = eigenvectors[:, idx]
 
     if verbose:
-        print(f"  ASM: wartości własne (top-{min(k+2, len(eigenvalues))}): "
-              f"{eigenvalues[:min(k+2, len(eigenvalues))]}")
+        print(
+            f"  ASM: wartości własne (top-{min(k+2, len(eigenvalues))}): "
+            f"{eigenvalues[:min(k+2, len(eigenvalues))]}"
+        )
         print(f"  ASM: ewaluacji funkcji = {2 * d * m_samples}")
 
     A_hat = eigenvectors[:, :k].T  # kształt (k, d)
@@ -112,6 +120,7 @@ def active_subspace_method(f: callable,
 # ===================================================================
 # 2. OMP-based Recovery
 # ===================================================================
+
 
 def _omp_solve(Phi: NDArray, y: NDArray, sparsity: int) -> NDArray:
     """
@@ -161,15 +170,17 @@ def _omp_solve(Phi: NDArray, y: NDArray, sparsity: int) -> NDArray:
     return x_out
 
 
-def omp_algorithm1(f: callable,
-                   d: int,
-                   m_Phi: int,
-                   m_X: int,
-                   sparsity: int,
-                   epsilon: float = 0.1,
-                   noise_sigma: float = 0.0,
-                   rng: np.random.Generator | None = None,
-                   verbose: bool = False) -> NDArray:
+def omp_algorithm1(
+    f: callable,
+    d: int,
+    m_Phi: int,
+    m_X: int,
+    sparsity: int,
+    epsilon: float = 0.1,
+    noise_sigma: float = 0.0,
+    rng: np.random.Generator | None = None,
+    verbose: bool = False,
+) -> NDArray:
     """
     Algorytm odzyskiwania wektora kierunkowego a z użyciem OMP
     zamiast minimalizacji l1.
@@ -210,6 +221,7 @@ def omp_algorithm1(f: callable,
     Phi = bernoulli_matrix(m_Phi, d, rng)
 
     from .algorithms import _build_finite_differences
+
     Y = _build_finite_differences(f, Xi, Phi, epsilon)
 
     if noise_sigma > 0:
@@ -239,16 +251,18 @@ def omp_algorithm1(f: callable,
     return a_hat
 
 
-def omp_algorithm2(f: callable,
-                   d: int,
-                   k: int,
-                   m_Phi: int,
-                   m_X: int,
-                   sparsity: int,
-                   epsilon: float = 0.1,
-                   noise_sigma: float = 0.0,
-                   rng: np.random.Generator | None = None,
-                   verbose: bool = False) -> NDArray:
+def omp_algorithm2(
+    f: callable,
+    d: int,
+    k: int,
+    m_Phi: int,
+    m_X: int,
+    sparsity: int,
+    epsilon: float = 0.1,
+    noise_sigma: float = 0.0,
+    rng: np.random.Generator | None = None,
+    verbose: bool = False,
+) -> NDArray:
     """
     Algorytm odzyskiwania podprzestrzeni A z użyciem OMP + SVD.
     Struktura jak Algorytm 2 Vybirala, z OMP zamiast l1.
@@ -265,6 +279,7 @@ def omp_algorithm2(f: callable,
     Phi = bernoulli_matrix(m_Phi, d, rng)
 
     from .algorithms import _build_finite_differences
+
     Y = _build_finite_differences(f, Xi, Phi, epsilon)
 
     if noise_sigma > 0:
@@ -281,8 +296,10 @@ def omp_algorithm2(f: callable,
     U, S, Vt = np.linalg.svd(X_hat.T, full_matrices=False)
 
     if verbose:
-        print(f"  OMP+SVD: wartości osobliwe (top-{min(k+2, len(S))}): "
-              f"{S[:min(k+2, len(S))]}")
+        print(
+            f"  OMP+SVD: wartości osobliwe (top-{min(k+2, len(S))}): "
+            f"{S[:min(k+2, len(S))]}"
+        )
 
     A_hat = Vt[:k, :]
     return A_hat
@@ -292,14 +309,17 @@ def omp_algorithm2(f: callable,
 # 3. Sliced Inverse Regression (SIR) — Li, 1991
 # ===================================================================
 
-def sliced_inverse_regression(f: callable,
-                              d: int,
-                              k: int,
-                              m_samples: int,
-                              n_slices: int = 10,
-                              noise_sigma: float = 0.0,
-                              rng: np.random.Generator | None = None,
-                              verbose: bool = False) -> NDArray:
+
+def sliced_inverse_regression(
+    f: callable,
+    d: int,
+    k: int,
+    m_samples: int,
+    n_slices: int = 10,
+    noise_sigma: float = 0.0,
+    rng: np.random.Generator | None = None,
+    verbose: bool = False,
+) -> NDArray:
     """
     Sliced Inverse Regression (SIR) — Li, 1991.
 
@@ -384,8 +404,10 @@ def sliced_inverse_regression(f: callable,
     eigenvectors = eigenvectors[:, idx]
 
     if verbose:
-        print(f"  SIR: wartości własne (top-{min(k+2, len(eigenvalues))}): "
-              f"{eigenvalues[:min(k+2, len(eigenvalues))]}")
+        print(
+            f"  SIR: wartości własne (top-{min(k+2, len(eigenvalues))}): "
+            f"{eigenvalues[:min(k+2, len(eigenvalues))]}"
+        )
         print(f"  SIR: ewaluacji funkcji = {m_samples}")
 
     A_hat = eigenvectors[:, :k].T  # kształt (k, d)
