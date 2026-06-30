@@ -147,7 +147,6 @@ def _omp_solve(Phi: NDArray, y: NDArray, sparsity: int) -> NDArray:
     m, d = Phi.shape
     residual = y.copy()
     support = []
-    x = np.zeros(d)
 
     for _ in range(sparsity):
         # Wybierz kolumnę Φ najbardziej skorelowaną z residuum
@@ -371,10 +370,6 @@ def sliced_inverse_regression(
     Y = np.array([f(X[i]) for i in range(m_samples)])
     if noise_sigma > 0:
         Y += rng.normal(0, noise_sigma, size=m_samples)
-
-    # Standaryzacja X (centrowanie)
-    X_mean = np.mean(X, axis=0)
-    X_centered = X - X_mean
 
     # (3) Plasterkowanie (slicing)
     sorted_idx = np.argsort(Y)

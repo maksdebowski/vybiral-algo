@@ -2,18 +2,32 @@
 Moduł eksperymentów numerycznych odtwarzających wyniki z pracy
 Fornasiera, Schnassa i Vybirala oraz rozdziału 3 pracy magisterskiej.
 
+We wszystkich eksperymentach solver l1 używa BPDN:
+    argmin ||z||_1  s.t.  ||Phi z - y||_2 <= tol
+z tolerancją tol = alpha * ||y||_2 + 1e-6 (bezszumowe)
+lub tol = sigma_fd * sqrt(m) + alpha * ||y||_2 + 1e-6 (zaszumione).
+Nie jest stosowane dokładne Basis Pursuit (równościowe).
+
 Eksperymenty:
 1. Weryfikacja dokładności rekonstrukcji (przypadek bezszumowy)
    — Algorytm 1 i Algorytm 2 na funkcjach testowych.
 2. Doświadczenia numeryczne w obecności szumu
    — Mapy sukcesu rekonstrukcji aktywnych współrzędnych (Figure 2).
 3. Analiza wpływu hiperparametrów (m_Φ, m_X, ε).
+4. Analiza wrażliwości na parametr tolerancji alpha (0.01, 0.05, 0.10).
 """
 
 import numpy as np
 import matplotlib.pyplot as plt
 
-from .algorithms import algorithm1, algorithm2, identify_active_coordinates
+from .algorithms import (
+    algorithm1,
+    algorithm2,
+    identify_active_coordinates,
+    _build_finite_differences,
+)
+from .l1_solver import l1_minimize
+from .sampling import sample_sphere, bernoulli_matrix
 from .test_functions import (
     vybiral_test_function,
     make_sparse_ridge_function,
@@ -35,6 +49,9 @@ def experiment_algorithm1_noiseless(
     Bada błąd rekonstrukcji ||a - sign·â||_2 w zależności od m_Φ.
     Funkcja testowa: f(x) = cos(π·a·x) z rzadkim wektorem a
     (3 aktywne współrzędne z d).
+
+    Solver: BPDN z tolerancją tol = 0.05 * ||y||_2 + 1e-6 (heurystyka).
+    Patrz `experiment_tolerance_sensitivity` dla analizy wpływu tej wartości.
 
     Zwraca
     -------
@@ -285,6 +302,109 @@ def experiment_epsilon_sensitivity(
         print(
             f"  ε = {eps:.4f}: błąd = {np.mean(errors):.6f}"
             + " ± "
+            + f"{np.std(errors):.6f}"
+        )
+
+    return results
+
+
+def experiment_tolerance_sensitivity(
+    d: int = 100,
+    m_Phi: int = 50,
+    m_X: int = 30,
+    epsilon: float = 0.1,
+    alpha_values: list[float] | None = None,
+    n_trials: int = 10,
+    seed: int = 42,
+) -> dict:
+    """
+    Eksperyment 5: Wrażliwość na parametr tolerancji BPDN (alpha).
+
+    We wszystkich eksperymentach solver l1 używa tolerancji:
+        tol = alpha * ||y||_2 + 1e-6
+    Wartość alpha=0.05 jest heurystyką. Ten eksperyment bada wpływ
+    wyboru alpha na błąd rekonstrukcji w przypadku bezszumowym.
+
+    Parametry
+    ----------
+    d : int
+        Wymiar przestrzeni (domyślnie 100).
+    m_Phi : int
+        Liczba kierunków pomiarowych (stała, domyślnie 50).
+    m_X : int
+        Liczba punktów próbkowania (stała, domyślnie 30).
+    epsilon : float
+        Krok różnicy skończonej.
+    alpha_values : list[float]
+        Wartości parametru alpha tolerancji do porównania.
+        Domyślnie [0.01, 0.05, 0.10].
+    n_trials : int
+        Liczba powtarzań każdego eksperymentu.
+    seed : int
+        Ziarno losowości.
+
+    Zwraca
+    -------
+    dict z kluczami: 'alpha_values', 'mean_errors', 'std_errors'
+    """
+    if alpha_values is None:
+        alpha_values = [0.01, 0.05, 0.10]
+
+    rng = np.random.default_rng(seed)
+    func, a_true = make_sparse_ridge_function(
+        d,
+        active_indices=[0, 1, 2],
+        active_values=np.array([1.0, 0.5, 0.3]),
+        rng=rng,
+    )
+
+    results = {
+        "alpha_values": alpha_values,
+        "mean_errors": [],
+        "std_errors": [],
+    }
+
+    Xi_list = []
+    Phi_list = []
+    Y_list = []
+    for trial in range(n_trials):
+        trial_rng = np.random.default_rng(seed + trial)
+        Xi = sample_sphere(d, m_X, trial_rng)
+        Phi = bernoulli_matrix(m_Phi, d, trial_rng)
+        Y = _build_finite_differences(func, Xi, Phi, epsilon)
+        Xi_list.append(Xi)
+        Phi_list.append(Phi)
+        Y_list.append(Y)
+
+    for alpha in alpha_values:
+        errors = []
+        for trial in range(n_trials):
+            Phi = Phi_list[trial]
+            Y = Y_list[trial]
+            try:
+                X_hat = np.zeros((d, m_X))
+                for j in range(m_X):
+                    y_j = Y[:, j]
+                    X_hat[:, j] = l1_minimize(Phi, y_j, tol_alpha=alpha)
+                norms = np.linalg.norm(X_hat, axis=0)
+                j0 = np.argmax(norms)
+                a_hat = X_hat[:, j0]
+                if np.linalg.norm(a_hat) > 1e-12:
+                    a_hat = a_hat / np.linalg.norm(a_hat)
+                    err = min(
+                        np.linalg.norm(a_hat - a_true),
+                        np.linalg.norm(a_hat + a_true),
+                    )
+                else:
+                    err = 2.0
+            except Exception:
+                err = 2.0
+            errors.append(err)
+        results["mean_errors"].append(np.mean(errors))
+        results["std_errors"].append(np.std(errors))
+        print(
+            f"  alpha = {alpha:.2f}: błąd = {np.mean(errors):.6f}"
+            + " +/- "
             + f"{np.std(errors):.6f}"
         )
 

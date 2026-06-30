@@ -6,7 +6,7 @@ gotowych do zamieszczenia w pracy magisterskiej.
 
 Użycie:
     python generate_figures.py           # wszystkie wykresy
-    python generate_figures.py --fig 1   # tylko figura nr 1
+    python generate_figures.py --fig 1   # tylko Rysunek nr 1
     python generate_figures.py --fig 1 3 5  # wybrane figury
 """
 
@@ -60,11 +60,11 @@ def _ensure_dir():
 
 
 # ===================================================================
-# Figura 1 — Algorytm 1: zbieżność błędu vs m_Φ przy różnych d
+# Rysunek 1 — Algorytm 1: zbieżność błędu vs m_Φ przy różnych d
 # ===================================================================
 def figure1():
     print("=" * 60)
-    print("Figura 1: Algorytm 1 — błąd rekonstrukcji vs m_Φ")
+    print("Rysunek 1: Algorytm 1 — błąd rekonstrukcji vs m_Φ")
     print("=" * 60)
 
     dims = [50, 100, 200]
@@ -142,11 +142,11 @@ def figure1():
 
 
 # ===================================================================
-# Figura 2 — Algorytm 1: porównanie prawdziwego i odzyskanego wektora
+# Rysunek 2 — Algorytm 1: porównanie prawdziwego i odzyskanego wektora
 # ===================================================================
 def figure2():
     print("=" * 60)
-    print("Figura 2: Algorytm 1 — prawdziwy vs odzyskany wektor a")
+    print("Rysunek 2: Algorytm 1 — prawdziwy vs odzyskany wektor a")
     print("=" * 60)
 
     d = 100
@@ -214,11 +214,11 @@ def figure2():
 
 
 # ===================================================================
-# Figura 3 — Algorytm 2: zbieżność błędu podprzestrzeni vs m_Φ
+# Rysunek 3 — Algorytm 2: zbieżność błędu podprzestrzeni vs m_Φ
 # ===================================================================
 def figure3():
     print("=" * 60)
-    print("Figura 3: Algorytm 2 — błąd podprzestrzeni vs m_Φ")
+    print("Rysunek 3: Algorytm 2 — błąd podprzestrzeni vs m_Φ")
     print("=" * 60)
 
     k_values = [2, 3]
@@ -291,11 +291,11 @@ def figure3():
 
 
 # ===================================================================
-# Figura 4 — Algorytm 2: wartości osobliwe X̂ (przerwa spektralna)
+# Rysunek 4 — Algorytm 2: wartości osobliwe X̂ (przerwa spektralna)
 # ===================================================================
 def figure4():
     print("=" * 60)
-    print("Figura 4: Algorytm 2 — wartości osobliwe macierzy X̂")
+    print("Rysunek 4: Algorytm 2 — wartości osobliwe macierzy X̂")
     print("=" * 60)
 
     d = 80
@@ -386,11 +386,11 @@ def figure4():
 
 
 # ===================================================================
-# Figura 5 — Wpływ parametru ε na jakość rekonstrukcji
+# Rysunek 5 — Wpływ parametru ε na jakość rekonstrukcji
 # ===================================================================
 def figure5():
     print("=" * 60)
-    print("Figura 5: Wpływ parametru ε na błąd rekonstrukcji")
+    print("Rysunek 5: Wpływ parametru ε na błąd rekonstrukcji")
     print("=" * 60)
 
     d = 100
@@ -430,7 +430,9 @@ def figure5():
             + f" ± {np.std(errors):.4f}"
         )
 
-    # --- Krzywa 2: z szumem σ=0.01 ---
+    # --- Krzywa 2: z szumem sigma_f=0.01 ---
+    # noise_sigma = sigma_f (szum pojedynczej obserwacji f(x))
+    # Efektywny szum FD: sigma_fd = sqrt(2)*sigma_f/epsilon
     noise_sigma = 0.01
     mean_noisy, std_noisy = [], []
     for eps in epsilon_values:
@@ -456,8 +458,9 @@ def figure5():
                 errors.append(2.0)
         mean_noisy.append(np.mean(errors))
         std_noisy.append(np.std(errors))
+        sigma_fd = np.sqrt(2) * noise_sigma / eps
         print(
-            f"[\\sigma={noise_sigma}] \\epsilon={eps:.4f}:"
+            f"[sigma_f={noise_sigma}, sigma_fd={sigma_fd:.4f}] eps={eps:.4f}:"
             + f" {np.mean(errors):.4f} +/- {np.std(errors):.4f}"
         )
 
@@ -468,7 +471,7 @@ def figure5():
         yerr=std_noiseless,
         marker="s",
         color=COLORS[0],
-        label=r"bez szumu ($\sigma=0$)",
+        label=r"bez szumu ($\sigma_f=0$, BPDN tol$=0.05\|y\|$)",
     )
     ax.errorbar(
         epsilon_values,
@@ -476,14 +479,15 @@ def figure5():
         yerr=std_noisy,
         marker="^",
         color=COLORS[1],
-        label=rf"z szumem ($\sigma={noise_sigma}$)",
+        label=rf"z szumem ($\sigma_f={noise_sigma}$,"
+        + r" $\sigma_{{\mathrm{{FD}}}}=\sqrt{{2}}\sigma_f/\epsilon$)",
     )
     ax.set_xscale("log")
     ax.set_yscale("log")
-    ax.set_xlabel(r"$\varepsilon$ (krok różnicy skończonej)")
+    ax.set_xlabel(r"$\epsilon$ (krok różnicy skończonej)")
     ax.set_ylabel(r"$\min_{\pm}\|a - (\pm\hat{a})\|_2$")
     ax.set_title(
-        r"Wpływ parametru $\varepsilon$ na jakość rekonstrukcji"
+        r"Wpływ parametru $\epsilon$ na jakość rekonstrukcji"
         + rf" ($d={d}$, $m_\Phi={m_Phi}$)"
     )
     ax.legend()
@@ -499,11 +503,11 @@ def figure5():
 
 
 # ===================================================================
-# Figura 6 — Algorytm 1: odporność na szum
+# Rysunek 6 — Algorytm 1: odporność na szum
 # ===================================================================
 def figure6():
     print("=" * 60)
-    print("Figura 6: Algorytm 1 — odporność na szum (noise robustness)")
+    print("Rysunek 6: Algorytm 1 — odporność na szum (noise robustness)")
     print("=" * 60)
 
     d = 100
@@ -551,9 +555,10 @@ def figure6():
                     errors.append(2.0)
             mean_errors.append(np.mean(errors))
             std_errors.append(np.std(errors))
+            sigma_fd = np.sqrt(2) * sigma / eps if sigma > 0 else 0.0
             print(
-                rf"\epsilon={eps}] \sigma={sigma:.4f}:"
-                + rf" {np.mean(errors):.4f} ± {np.std(errors):.4f}"
+                f"  [eps={eps}, sigma_f={sigma:.4f}, sigma_fd={sigma_fd:.4f}]:"
+                + f" {np.mean(errors):.4f} +/- {np.std(errors):.4f}"
             )
 
         x_labels = [str(s) if s > 0 else "0" for s in noise_sigmas]
@@ -565,17 +570,20 @@ def figure6():
             yerr=std_errors,
             marker=MARKERS[eps_idx],
             color=COLORS[eps_idx],
-            label=rf"$\varepsilon = {eps}$",
+            label=rf"$\epsilon = {eps}$",
         )
 
     ax.set_xticks(x_pos)
     ax.set_xticklabels(x_labels, rotation=30)
     ax.set_yscale("log")
-    ax.set_xlabel(r"$\sigma$ (odchylenie standardowe szumu)")
+    ax.set_xlabel(
+        r"$\sigma_f$ (szum pojedynczej obserwacji $f(x)$"
+        + r", efektywny FD: $\sqrt{2}\,\sigma_f/\epsilon$)"
+    )
     ax.set_ylabel(r"$\min_{\pm}\|a - (\pm\hat{a})\|_2$")
     ax.set_title(
         "Algorytm 1: odporność na szum Gaussowski"
-        + rf" ($d={d}$, $m_\Phi={m_Phi}$)"
+        + rf" ($d={d}$, $m_\Phi={m_Phi}$, $\epsilon$=0.1 lub 0.5)"
     )
     ax.legend()
 
@@ -588,11 +596,11 @@ def figure6():
 
 
 # ===================================================================
-# Figura 7 — Skalowanie z wymiarem d (fixed m_Φ/log(d) ratio)
+# Rysunek 7 — Skalowanie z wymiarem d (fixed m_Φ/log(d) ratio)
 # ===================================================================
 def figure7():
     print("=" * 60)
-    print("Figura 7: Skalowanie błędu z wymiarem d")
+    print("Rysunek 7: Skalowanie błędu z wymiarem d")
     print("=" * 60)
 
     d_values = [30, 50, 80, 120, 200, 300]
@@ -723,6 +731,222 @@ def figure7():
 
 
 # ===================================================================
+# Rysunek 8 — Algorytm 2: odporność na szum
+# ===================================================================
+def figure8():
+    print("=" * 60)
+    print("Rysunek 8: Algorytm 2 — odporność na szum (noise robustness)")
+    print("=" * 60)
+
+    d = 80
+    k = 2
+    m_Phi = 60
+    m_X = 40
+    # noise_sigma = sigma_f (szum pojedynczej obserwacji f(x))
+    # efektywny szum FD: sigma_fd = sqrt(2)*sigma_f/epsilon
+    noise_sigmas = [0.0, 0.0001, 0.0005, 0.001, 0.002, 0.005, 0.01, 0.05]
+    n_trials = 8
+    seed = 42
+
+    rng_setup = np.random.default_rng(seed)
+    func, A_true = make_k_ridge_function(
+        d, k, active_indices=list(range(k * 3)), rng=rng_setup
+    )
+    P_true = A_true.T @ A_true
+
+    eps_values = [0.1, 0.5]
+    fig, ax = plt.subplots()
+
+    for eps_idx, eps in enumerate(eps_values):
+        mean_errors, std_errors = [], []
+        for sigma in noise_sigmas:
+            errors = []
+            for trial in range(n_trials):
+                rng_trial = np.random.default_rng(
+                    seed + trial + int(sigma * 1e6) + int(eps * 1000)
+                )
+                try:
+                    A_hat, _ = algorithm2(
+                        func,
+                        d,
+                        k,
+                        m_Phi,
+                        m_X,
+                        epsilon=eps,
+                        noise_sigma=sigma,
+                        rng=rng_trial,
+                    )
+                    P_hat = A_hat.T @ A_hat
+                    errors.append(np.linalg.norm(P_true - P_hat, "fro"))
+                except Exception:
+                    errors.append(2.0)
+            mean_errors.append(np.mean(errors))
+            std_errors.append(np.std(errors))
+            sigma_fd = np.sqrt(2) * sigma / eps if sigma > 0 else 0.0
+            print(
+                f"  [eps={eps}, sigma_f={sigma:.4f}, sigma_fd={sigma_fd:.4f}]:"
+                + f" {np.mean(errors):.4f} +/- {np.std(errors):.4f}"
+            )
+
+        x_labels = [str(s) if s > 0 else "0" for s in noise_sigmas]
+        x_pos = np.arange(len(noise_sigmas))
+
+        ax.errorbar(
+            x_pos,
+            mean_errors,
+            yerr=std_errors,
+            marker=MARKERS[eps_idx],
+            color=COLORS[eps_idx],
+            label=rf"$\epsilon = {eps}$",
+        )
+
+    ax.set_xticks(x_pos)
+    ax.set_xticklabels(x_labels, rotation=30)
+    ax.set_yscale("log")
+    ax.set_xlabel(
+        r"$\sigma_f$ (szum pojedynczej obserwacji $f(x)$,"
+        r" efektywny FD: $\sqrt{2}\,\sigma_f/\epsilon$)"
+    )
+    ax.set_ylabel(r"$\|A^T A - \hat{A}^T \hat{A}\|_F$")
+    ax.set_title(
+        "Algorytm 2: odporność na szum Gaussowski"
+        + rf" ($d={d}$, $k={k}$, $m_\Phi={m_Phi}$, $\epsilon$=0.1 lub 0.5)"
+    )
+    ax.legend()
+
+    fig.tight_layout()
+    fig.savefig(
+        f"{FIGDIR}/fig8_alg2_noise.jpg", format="jpeg", bbox_inches="tight"
+    )
+    plt.close(fig)
+    print("  → Zapisano fig8_alg2_noise.jpg\n")
+
+
+# ===================================================================
+# Rysunek 9 — Algorytm 2: skalowanie błędu podprzestrzeni z wymiarem d
+# ===================================================================
+def figure9():
+    print("=" * 60)
+    print("Rysunek 9: Algorytm 2 — skalowanie błędu podprzestrzeni vs d")
+    print("=" * 60)
+
+    k = 2
+    d_values = [30, 50, 80, 120, 200, 300]
+    m_X = 40
+    n_trials = 8
+    seed = 42
+
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 4.5))
+
+    # (a) Stałe m_Φ = 60
+    m_Phi_fixed = 60
+    mean_errors_fixed, std_errors_fixed = [], []
+    for d in d_values:
+        if m_Phi_fixed >= d:
+            mean_errors_fixed.append(np.nan)
+            std_errors_fixed.append(np.nan)
+            continue
+        rng_setup = np.random.default_rng(seed)
+        func, A_true = make_k_ridge_function(
+            d, k, active_indices=list(range(k * 3)), rng=rng_setup
+        )
+        P_true = A_true.T @ A_true
+        errors = []
+        for trial in range(n_trials):
+            rng_trial = np.random.default_rng(seed + trial + d * 10000)
+            try:
+                A_hat, _ = algorithm2(
+                    func, d, k, m_Phi_fixed, m_X, epsilon=0.1, rng=rng_trial
+                )
+                P_hat = A_hat.T @ A_hat
+                errors.append(np.linalg.norm(P_true - P_hat, "fro"))
+            except Exception:
+                errors.append(2.0)
+        mean_errors_fixed.append(np.mean(errors))
+        std_errors_fixed.append(np.std(errors))
+        print(f"  [stałe m_Φ={m_Phi_fixed}] d={d}: {np.mean(errors):.4f}")
+
+    valid = [i for i, v in enumerate(mean_errors_fixed) if not np.isnan(v)]
+    ax1.errorbar(
+        [d_values[i] for i in valid],
+        [mean_errors_fixed[i] for i in valid],
+        yerr=[std_errors_fixed[i] for i in valid],
+        marker="o",
+        color=COLORS[0],
+    )
+    ax1.set_xlabel(r"$d$ (wymiar przestrzeni)")
+    ax1.set_ylabel(r"$\|A^T A - \hat{A}^T \hat{A}\|_F$")
+    ax1.set_title(rf"(a) Stałe $m_\Phi = {m_Phi_fixed}$")
+    ax1.set_yscale("log")
+
+    # (b) m_Φ = 15·log(d)
+    mean_errors_scaled, std_errors_scaled, m_Phi_used = [], [], []
+    for d in d_values:
+        m_Phi = max(20, int(15 * np.log(d)))
+        if m_Phi >= d:
+            mean_errors_scaled.append(np.nan)
+            std_errors_scaled.append(np.nan)
+            m_Phi_used.append(m_Phi)
+            continue
+        m_Phi_used.append(m_Phi)
+        rng_setup = np.random.default_rng(seed)
+        func, A_true = make_k_ridge_function(
+            d, k, active_indices=list(range(k * 3)), rng=rng_setup
+        )
+        P_true = A_true.T @ A_true
+        errors = []
+        for trial in range(n_trials):
+            rng_trial = np.random.default_rng(seed + trial + d * 10000)
+            try:
+                A_hat, _ = algorithm2(
+                    func, d, k, m_Phi, m_X, epsilon=0.1, rng=rng_trial
+                )
+                P_hat = A_hat.T @ A_hat
+                errors.append(np.linalg.norm(P_true - P_hat, "fro"))
+            except Exception:
+                errors.append(2.0)
+        mean_errors_scaled.append(np.mean(errors))
+        std_errors_scaled.append(np.std(errors))
+        print(f"  [m_Φ=15ln(d)={m_Phi}] d={d}: {np.mean(errors):.4f}")
+
+    valid = [i for i, v in enumerate(mean_errors_scaled) if not np.isnan(v)]
+    ax2.errorbar(
+        [d_values[i] for i in valid],
+        [mean_errors_scaled[i] for i in valid],
+        yerr=[std_errors_scaled[i] for i in valid],
+        marker="s",
+        color=COLORS[1],
+    )
+    for i in valid:
+        ax2.annotate(
+            rf"$m_\Phi\!=\!{m_Phi_used[i]}$",
+            xy=(d_values[i], mean_errors_scaled[i]),
+            xytext=(5, 8),
+            textcoords="offset points",
+            fontsize=8,
+            color="gray",
+        )
+    ax2.set_xlabel(r"$d$ (wymiar przestrzeni)")
+    ax2.set_ylabel(r"$\|A^T A - \hat{A}^T \hat{A}\|_F$")
+    ax2.set_title(r"(b) $m_\Phi = \lceil 15 \ln d \rceil$")
+    ax2.set_yscale("log")
+
+    fig.suptitle(
+        rf"Skalowanie błędu Algorytmu 2 z wymiarem $d$ ($k={k}$, $m_X={m_X}$)",
+        fontsize=13,
+        y=1.02,
+    )
+    fig.tight_layout()
+    fig.savefig(
+        f"{FIGDIR}/fig9_alg2_dimension_scaling.jpg",
+        format="jpeg",
+        bbox_inches="tight",
+    )
+    plt.close(fig)
+    print("  → Zapisano fig9_alg2_dimension_scaling.jpg\n")
+
+
+# ===================================================================
 # main
 # ===================================================================
 FIGURES = {
@@ -733,6 +957,8 @@ FIGURES = {
     5: figure5,
     6: figure6,
     7: figure7,
+    8: figure8,
+    9: figure9,
 }
 
 
@@ -756,7 +982,7 @@ def main():
     for fig_num in figs_to_run:
         if fig_num not in FIGURES:
             print(
-                f"UWAGA: Figura {fig_num} nie istnieje"
+                f"UWAGA: Rysunek {fig_num} nie istnieje"
                 + f"(dostępne: {sorted(FIGURES.keys())})"
             )
             continue

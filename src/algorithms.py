@@ -76,12 +76,20 @@ def algorithm1(
     1. Wylosuj zbiory $\\Phi$ ($m_\\Phi$ kierunków Bernoulliego) i $X$
     ($m_X$ punktów na sferze).
     2. Skonstruuj macierz $Y$ ilorazów różnicowych.
-    3. Dla każdej kolumny $y_j$ rozwiąż $\\min \\|z\\|_{\\ell_1}$ s.t.
-    $\\Phi z = y_j \\rightarrow \\hat{x}_j$.
+    3. Dla każdej kolumny $y_j$ rozwiąż BPDN (nie BP) z tolerancją
+    zależną od szumu.
     4. Znajdź $j_0 = \\mathrm{argmax}_j \\|\\hat{x}_j\\|_2$.
     5. Znormalizuj: $\\hat{a} = \\hat{x}_{j_0} / \\|\\hat{x}_{j_0}\\|_2$.
-    6. Zdefiniuj $\\hat{g}(y) = f(\\hat{a}^T \\cdot y)$ i
-    $\\hat{f}(x) = \\hat{g}(\\hat{a} \\cdot x)$.
+    6. Zdefiniuj $\\hat{f}(x) = f(\\hat{a}^T (\\hat{a} \\cdot x))$.
+
+    Model szumu: `noise_sigma` ($\\sigma_f$) to odchylenie standardowe
+    szumu jednotej obserwacji $f(x)$. Do każdej z dwóch ewaluacji
+    tworzących iloraz różnicowy dodawany jest niezależny szum
+    $\\mathcal{N}(0, \\sigma_f^2)$. Szum na ilorazie różnicowym ma wtedy
+    odchylenie $\\sigma_{\\mathrm{FD}} = \\sqrt{2}\\,\\sigma_f / \\epsilon$.
+    Ten sam punkt bazowy $f(\\xi_j)$ jest współdzielony przez wszystkie
+    kierunki $\\phi_i$ dla danego $j$, co wprowadza korelację błędów
+    w jednej kolumnie $y_j$ macierzy $Y$.
 
     Parametry
     ----------
@@ -96,8 +104,9 @@ def algorithm1(
     epsilon : float
         Krok różnicy skończonej (domyślnie 0.1).
     noise_sigma : float
-        Odchylenie standardowe szumu Gaussa dodawanego do pomiarów
-        (0.0 = brak szumu).
+        Odchylenie standardowe szumu Gaussa na pojedynczej obserwacji
+        $f(x)$ (0.0 = brak szumu). Szum na ilorazie różnicowym wynosi
+        $\\sqrt{2}\\,\\sigma_f / \\epsilon$ (gdzie $\\sigma_f$ = noise_sigma).
     rng : np.random.Generator, opcjonalnie
         Generator liczb losowych.
     verbose : bool
@@ -130,19 +139,25 @@ def algorithm1(
     # (2) Macierz Y ilorazów różnicowych
     Y = _build_finite_differences(f, Xi, Phi_directions, epsilon)
 
-    # Opcjonalnie: dodanie szumu do Y
+    # Opcjonalnie: dodanie szumu do Y.
+    # Szum jest dodawany niezależnie do każdej ewaluacji funkcji f.
+    # Współdzielony f(xi_j) wprowadza korelację w kolumnie Y[:,j].
+    # Efektywny szum FD: N(0, (sqrt(2)*noise_sigma/epsilon)^2).
     if noise_sigma > 0:
-        W = rng.normal(0, noise_sigma, size=Y.shape)
-        Y = Y + W / epsilon
+        # Szum na f(xi_j + eps*phi_i) -- niezależny dla każdego (i,j)
+        noise_shifted = rng.normal(0, noise_sigma, size=(m_Phi, m_X))
+        # Szum na f(xi_j) -- współdzielony przez wszystkie kierunki i
+        noise_base = rng.normal(0, noise_sigma, size=(1, m_X))
+        Y = Y + (noise_shifted - noise_base) / epsilon
 
-    # (3) Minimalizacja l1 dla każdej kolumny
+    # (3) Minimalizacja l1 dla każdej kolumny (BPDN we wszystkich przypadkach)
     X_hat = np.zeros((d, m_X))
     for j in range(m_X):
         y_j = Y[:, j]
         if noise_sigma > 0:
-            # Tolerancja = szum pomiarowy ($\\sigma\\sqrt{m}/\\epsilon$) +
-            # residuum Taylora (~5% $\\|y\\|$)
-            noise_tol = noise_sigma * np.sqrt(m_Phi) / epsilon
+            # sigma_fd = sqrt(2)*sigma_f/epsilon (szum ilorazu różnicowego)
+            sigma_fd = np.sqrt(2) * noise_sigma / epsilon
+            noise_tol = sigma_fd * np.sqrt(m_Phi)
             taylor_tol = 0.05 * np.linalg.norm(y_j)
             X_hat[:, j] = l1_minimize(
                 Phi, y_j, tol=noise_tol + taylor_tol + 1e-6
@@ -194,12 +209,17 @@ def algorithm2(
 
     Kroki:
     1. Wylosuj zbiory $\\Phi$ i $X$, skonstruuj macierz $Y$.
-    2. Dla każdej kolumny $y_j$: $\\hat{x}_j =
-    \\mathrm{argmin} \\|z\\|_{\\ell_1}$ s.t. $\\Phi z = y_j$.
+    2. Dla każdej kolumny $y_j$: BPDN (nie BP).
     3. SVD transpozycji $\\hat{X}^T = \\hat{U}_1
     \\hat{\\Sigma}_1 \\hat{V}_1^T + \\hat{U}_2 \\hat{\\Sigma}_2 \\hat{V}_2^T$.
     4. $\\hat{A} = \\hat{V}_1^T$ ($k$ prawych wektorów osobliwych).
-    5. $\\hat{g}(y) = f(\\hat{A}^T y)$, $\\hat{f}(x) = \\hat{g}(\\hat{A}x)$.
+    5. $\\hat{f}(x) = f(\\hat{A}^T (\\hat{A} x))$.
+
+    Model szumu: analogiczny jak w `algorithm1`. `noise_sigma` ($\\sigma_f$)
+    to odchylenie standardowe szumu pojedynczej obserwacji $f(x)$.
+    Szum na ilorazie różnicowym: $\\sigma_{\\mathrm{FD}} =
+    \\sqrt{2}\\,\\sigma_f / \\epsilon$. Punkt bazowy $f(\\xi_j)$ jest
+    współdzielony przez wszystkie wiersze dla danego $j$.
 
     Parametry
     ----------
@@ -216,7 +236,8 @@ def algorithm2(
     epsilon : float
         Krok różnicy skończonej.
     noise_sigma : float
-        Odchylenie standardowe szumu (0 = brak).
+        Odchylenie standardowe szumu na pojedynczej obserwacji $f(x)$
+        (0 = brak szumu).
     rng : np.random.Generator, opcjonalnie
         Generator liczb losowych.
     verbose : bool
@@ -241,15 +262,17 @@ def algorithm2(
     Y = _build_finite_differences(f, Xi, Phi_directions, epsilon)
 
     if noise_sigma > 0:
-        W = rng.normal(0, noise_sigma, size=Y.shape)
-        Y = Y + W / epsilon
+        noise_shifted = rng.normal(0, noise_sigma, size=(m_Phi, m_X))
+        noise_base = rng.normal(0, noise_sigma, size=(1, m_X))
+        Y = Y + (noise_shifted - noise_base) / epsilon
 
-    # (3) Minimalizacja l1
+    # (3) Minimalizacja l1 (BPDN we wszystkich przypadkach)
     X_hat = np.zeros((d, m_X))
     for j in range(m_X):
         y_j = Y[:, j]
         if noise_sigma > 0:
-            noise_tol = noise_sigma * np.sqrt(m_Phi) / epsilon
+            sigma_fd = np.sqrt(2) * noise_sigma / epsilon
+            noise_tol = sigma_fd * np.sqrt(m_Phi)
             taylor_tol = 0.05 * np.linalg.norm(y_j)
             X_hat[:, j] = l1_minimize(
                 Phi, y_j, tol=noise_tol + taylor_tol + 1e-6

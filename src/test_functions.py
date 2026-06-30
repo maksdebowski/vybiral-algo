@@ -13,14 +13,14 @@ from numpy.typing import NDArray
 
 class RidgeFunction:
     """
-    Funkcja grzbietowa f(x) = g(a · x), gdzie a ∈ S^{d-1}.
+    Funkcja grzbietowa $f(x) = g(a \\cdot x)$, gdzie $a \\in S^{d-1}$.
 
     Parametry
     ----------
     a : NDArray o kształcie (d,)
-        Wektor kierunkowy (znormalizowany do ||a||=1).
+        Wektor kierunkowy (znormalizowany do $\\|a\\|=1$).
     g : callable
-        Funkcja jednej zmiennej g: R → R.
+        Funkcja jednej zmiennej $g: \\mathbb{R} \\rightarrow \\mathbb{R}$.
     """
 
     def __init__(self, a: NDArray, g: callable):
@@ -35,14 +35,15 @@ class RidgeFunction:
 
 class KRidgeFunction:
     """
-    Funkcja k-grzbietowa f(x) = g(Ax), gdzie A ∈ M_{k×d}, AA^T = I_k.
+    Funkcja k-grzbietowa $f(x) = g(Ax)$, gdzie
+    $A \\in M_{k \\times d}$, $AA^T = I_k$.
 
     Parametry
     ----------
     A : NDArray o kształcie (k, d)
         Macierz parametrów liniowych z ortonormalnymi wierszami.
     g : callable
-        Funkcja g: R^k → R.
+        Funkcja g: $\\mathbb{R}^k \\rightarrow \\mathbb{R}$.
     """
 
     def __init__(self, A: NDArray, g: callable):
@@ -58,9 +59,9 @@ class KRidgeFunction:
 def vybiral_test_function(x: NDArray) -> float:
     """
     Funkcja testowa z równania (63) pracy Vybirala et al.:
-        f(x) = max(1 - 5 * sqrt((x_3 - 1/2)^2 + (x_4 - 1/2)^2), 0)^3
+    $f(x) = \\max(1 - 5 \\sqrt{(x_3 - 1/2)^2 + (x_4 - 1/2)^2}, 0)^3$
 
-    Funkcja zdefiniowana na R^d (d ≥ 4), zależy tylko od
+    Funkcja zdefiniowana na $\\mathbb{R}^d$ ($d \\geq 4$), zależy tylko od
     współrzędnych x[2] i x[3] (indeksowanie od 0).
 
     To jest funkcja 2-grzbietowa z aktywnymi współrzędnymi {3, 4}
@@ -69,7 +70,7 @@ def vybiral_test_function(x: NDArray) -> float:
     Parametry
     ----------
     x : NDArray o kształcie (d,)
-        Punkt ewaluacji, d ≥ 4.
+        Punkt ewaluacji, $d \\geq 4$.
 
     Zwraca
     -------
@@ -88,7 +89,7 @@ def make_sparse_ridge_function(
     rng: np.random.Generator | None = None,
 ):
     """
-    Tworzy funkcję grzbietową f(x) = g(a · x) z rzadkim wektorem a,
+    Tworzy funkcję grzbietową $f(x) = g(a \\cdot x)$ z rzadkim wektorem a,
     gdzie niezerowe współrzędne to active_indices.
 
     g(t) = cos(π·t) — prosta nieliniowa funkcja spełniająca
@@ -135,7 +136,7 @@ def make_k_ridge_function(
     rng: np.random.Generator | None = None,
 ):
     """
-    Tworzy funkcję k-grzbietową f(x) = g(Ax) z rzadką macierzą A.
+    Tworzy funkcję k-grzbietową $f(x) = g(Ax)$ z rzadką macierzą A.
 
     g(y) = ||y||^2 — prosta funkcja radialna spełniająca warunki modelu
     (C2, wartości oraz pochodne ograniczone).

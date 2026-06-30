@@ -3,8 +3,9 @@ Moduł odpowiedzialny za generowanie losowych zbiorów próbkowania
 wykorzystywanych w algorytmach aproksymacji funkcji grzbietowych.
 
 Zawiera:
-- Losowanie punktów z jednostajnej miary powierzchniowej na sferze S^{d-1}
-- Generowanie macierzy pomiarowej Φ (Bernoulli, przeskalowana 1/√m)
+- Losowanie punktów z jednostajnej miary powierzchniowej na sferze $S^{d-1}$
+- Generowanie macierzy pomiarowej $\\Phi$
+  (Bernoulli, przeskalowana $1/\\sqrt{m}$)
 """
 
 import numpy as np
@@ -15,10 +16,10 @@ def sample_sphere(
     d: int, m: int, rng: np.random.Generator | None = None
 ) -> NDArray:
     """
-    Losuje m punktów z jednostajnej miary powierzchniowej μ_{S^{d-1}}
-    na sferze jednostkowej S^{d-1} w R^d.
+    Losuje m punktów z jednostajnej miary powierzchniowej $\\mu_{S^{d-1}}$
+    na sferze jednostkowej $S^{d-1}$ w $\\mathbb{R}^d$.
 
-    Metoda: normalizacja wektorów z rozkładu N(0, I_d).
+    Metoda: normalizacja wektorów z rozkładu $\\mathcal{N}(0, I_d)$.
 
     Parametry
     ----------
@@ -32,7 +33,7 @@ def sample_sphere(
     Zwraca
     -------
     NDArray o kształcie (m, d)
-        Macierz, której wiersze to punkty na sferze S^{d-1}.
+        Macierz, której wiersze to punkty na sferze $S^{d-1}$.
     """
     if rng is None:
         rng = np.random.default_rng()
@@ -45,18 +46,19 @@ def bernoulli_matrix(
     m: int, d: int, rng: np.random.Generator | None = None
 ) -> NDArray:
     """
-    Generuje macierz pomiarową Φ o wymiarze m × d,
+    Generuje macierz pomiarową $\\Phi$ o wymiarze $m \\times d$,
     składającą się z niezależnych zmiennych Bernoulliego
-    przeskalowanych przez 1/√m.
+    przeskalowanych przez $1/\\sqrt{m}$.
 
-    Φ_{iℓ} = (1/√m) * {+1 z pr. 1/2, -1 z pr. 1/2}
+    $\\Phi_{i\\ell} = (1/\\sqrt{m}) \\cdot {+1 \\text{ z pr. } 1/2,
+         -1 \\text{ z pr. } 1/2}$
 
     Zgodnie z (16) z pracy Fornasiera, Schnassa i Vybirala.
 
     Parametry
     ----------
     m : int
-        Liczba wierszy (kierunków pomiarowych m_Φ).
+        Liczba wierszy (kierunków pomiarowych $m_\\Phi$).
     d : int
         Liczba kolumn (wymiar przestrzeni).
     rng : np.random.Generator, opcjonalnie
@@ -65,7 +67,7 @@ def bernoulli_matrix(
     Zwraca
     -------
     NDArray o kształcie (m, d)
-        Macierz pomiarowa Φ.
+        Macierz pomiarowa $\\Phi$.
     """
     if rng is None:
         rng = np.random.default_rng()
